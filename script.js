@@ -347,10 +347,10 @@ function initRSVP() {
         document.body.style.overflow = 'hidden';
     };
     
-    // Abrir modal ao clicar nos nomes
-    nomesClicaveis.addEventListener('click', function() {
-        window.abrirModalRSVP('Noivos');
-    });
+    // Funcionalidade de clique nos nomes removida conforme solicitado
+    // nomesClicaveis.addEventListener('click', function() {
+    //     window.abrirModalRSVP('Noivos');
+    // });
     
     // Eventos de fechar modal
     btnFechar.addEventListener('click', window.fecharModalRSVP);
