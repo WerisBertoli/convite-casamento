@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Regras para a coleção RSVP do casamento
+    match /rsvp/{document} {
+      // Permite leitura e escrita até 31 de dezembro de 2026
+      allow read, write: if request.time < timestamp.date(2026, 12, 31);
+    }
+    
+    // Regra alternativa mais restritiva (recomendada para produção)
+    // match /rsvp/{document} {
+    //   allow read: if true;
+    //   allow write: if request.auth != null || 
+    //                   (resource == null && request.resource.data.keys().hasAll(['nome', 'resposta', 'timestamp']));
+    // }
+  }
+}
+
+// INSTRUÇÕES PARA APLICAR AS REGRAS:
+// 1. Acesse o Console do Firebase: https://console.firebase.google.com/
+// 2. Selecione seu projeto
+// 3. Vá em "Firestore Database" > "Regras"
+// 4. Copie e cole o conteúdo acima
+// 5. Clique em "Publicar"
+//
+// IMPORTANTE: As regras atuais expiraram em 13/06/2025
+// Por isso o Firebase está bloqueando todas as operações

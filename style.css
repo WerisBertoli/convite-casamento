@@ -1,0 +1,554 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color:rgb(255, 255, 255);
+    background-image: url('Convite_Casamento.svg?v=2024');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    overflow: hidden;
+}
+
+html {
+    height: 100%;
+    background-color:rgb(255, 255, 255);
+}
+
+* {
+    background-color: inherit;
+}
+
+#campo-principal {
+    width: 300px;
+    padding: 20px;
+    font-size: 24px;
+    border: none;
+    text-align: center;
+    outline: none;
+    margin-bottom: 10px;
+    font-family: "Freight Big Pro", serif;
+    background: transparent;
+    box-shadow: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    color: #333333;
+    /* Touch-friendly */
+    min-height: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#campo-principal:focus,
+#campo-principal:active,
+#campo-principal:hover {
+    border: none;
+    outline: none;
+    box-shadow: none;
+    background: transparent;
+}
+
+#campo-principal::placeholder {
+    animation: blinkDots 2s infinite;
+    color: #999999;
+}
+
+@keyframes blinkDots {
+    0%, 20% {
+        color: #999999;
+    }
+    25%, 45% {
+        color: #666666;
+    }
+    50%, 70% {
+        color: #999999;
+    }
+    75%, 95% {
+        color: #666666;
+    }
+    100% {
+        color: #999999;
+    }
+}
+
+/* Nomes dos noivos */
+.nomes-noivos {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+#nomes-clicaveis {
+    color: #333333;
+    font-size: 2.5rem;
+    font-weight: 300;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0;
+    padding: 1rem;
+}
+
+#nomes-clicaveis:hover {
+    color: #666666;
+    transform: scale(1.02);
+}
+
+/* Frase informativa */
+.frase {
+    font-family: "Snell Roundhand", cursive;
+    font-size: 20px;
+    color: #666666;
+    text-align: center;
+    margin: 0;
+    transition: opacity 0.3s ease;
+}
+
+.frase.escondida {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Modal de RSVP - Estilo Ultra Minimalista */
+.modal-rsvp {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+    background: #FFFFFF;
+    border-radius: 0;
+    padding: 3rem 2rem;
+    box-shadow: none;
+    position: relative;
+    max-width: 350px;
+    width: 85%;
+    text-align: center;
+    animation: slideUp 0.3s ease;
+    border: none;
+}
+
+.rsvp-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.btn-rsvp {
+    padding: 1.2rem 2rem;
+    border: none;
+    border-radius: 0;
+    font-size: 1rem;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+    background: transparent;
+    color: #333333;
+    font-family: "Freight Big Pro", serif;
+    text-transform: lowercase;
+    /* Touch-friendly */
+    min-height: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.btn-confirmar {
+    color: #4CAF50;
+}
+
+.btn-confirmar:hover {
+    background: #4CAF50;
+    color: white;
+}
+
+.btn-declinar {
+    color: #F44336;
+}
+
+.btn-declinar:hover {
+    background: #F44336;
+    color: white;
+}
+
+.btn-fechar {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #666666;
+    cursor: pointer;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+    transition: all 0.3s ease;
+    font-weight: 300;
+    /* Touch-friendly */
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.btn-fechar:hover {
+    background: #F5F5F5;
+    color: #666666;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Painel de Administração - Estilo Minimalista */
+.admin-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.admin-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    border: 1px solid #E8E8E8;
+}
+
+.admin-content h3 {
+    color: #333333;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    font-weight: 400;
+}
+
+.admin-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.admin-btn {
+    padding: 0.6rem 1rem;
+    border: 1px solid #E0E0E0;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 400;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    flex: 1;
+    min-width: 120px;
+    background: #FFFFFF;
+    color: #333333;
+}
+
+.admin-btn:not(.danger):hover {
+    background: #F8F8F8;
+    border-color: #CCCCCC;
+}
+
+.admin-btn.danger {
+    border-color: #F44336;
+    color: #F44336;
+}
+
+.admin-btn.danger:hover {
+    background: #F44336;
+    color: white;
+}
+
+.respostas-container {
+    border-top: 2px solid #f0f0f0;
+    padding-top: 15px;
+    min-height: 50px;
+}
+
+.resposta-item {
+    background: #FAFAFA;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid #E0E0E0;
+    border: 1px solid #F0F0F0;
+}
+
+.resposta-confirmada {
+    border-left-color: #4CAF50;
+    background: #F8FFF8;
+}
+
+.resposta-declinada {
+    border-left-color: #F44336;
+    background: #FFF8F8;
+}
+
+.resposta-status {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.resposta-data {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Responsividade Mobile */
+@media (max-width: 768px) {
+    body {
+        padding: 1rem;
+        overflow-x: hidden;
+    }
+    
+    #campo-principal {
+        width: 90%;
+        max-width: 280px;
+        font-size: 20px;
+        padding: 15px;
+    }
+    
+    #nomes-clicaveis {
+        font-size: 2rem;
+        letter-spacing: 2px;
+        padding: 0.5rem;
+    }
+    
+    .modal-content {
+        padding: 2rem 1.5rem;
+        margin: 1rem;
+        width: 90%;
+        max-width: 320px;
+    }
+    
+    .btn-rsvp {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        width: 100%;
+    }
+    
+    .admin-content {
+        padding: 20px;
+        margin: 20px;
+        width: 90%;
+    }
+    
+    .admin-buttons {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .admin-btn {
+        width: 100%;
+        padding: 1rem;
+    }
+    
+    .versiculo {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    #nomes-clicaveis {
+        font-size: 1.8rem;
+        letter-spacing: 1px;
+    }
+    
+    #campo-principal {
+        font-size: 18px;
+        width: 95%;
+    }
+    
+    .modal-content {
+        padding: 1.5rem 1rem;
+        margin: 0.5rem;
+    }
+    
+    .btn-rsvp {
+        font-size: 0.9rem;
+        padding: 0.8rem 1rem;
+    }
+    
+    .versiculo p {
+        font-size: 0.8rem;
+    }
+    
+    .versiculo span {
+        font-size: 0.7rem;
+    }
+}
+
+/* Estilos do Autocomplete - Ultra Minimalista */
+.autocomplete-lista {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    list-style: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.autocomplete-item {
+    padding: 15px 0 !important;
+    margin: 0 !important;
+    cursor: pointer;
+    font-family: "Freight Big Pro", serif;
+    font-size: 16px;
+    color: #666666;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    text-align: center;
+    list-style: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    /* Touch-friendly */
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.selecionado {
+    color: #333333;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.autocomplete-item strong {
+    color: #333333;
+    font-weight: normal;
+}
+
+/* Container para posicionamento relativo */
+.input-container {
+    position: relative;
+    display: inline-block;
+    width: 300px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.input-container * {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+#campo-principal {
+    width: 100%;
+}
+
+/* Versículo bíblico */
+.versiculo {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    font-family: "Freight Big Pro", serif;
+    color: #666666;
+    font-size: 0.9rem;
+    font-weight: 300;
+    letter-spacing: 0.3px;
+    z-index: 10;
+}
+
+.versiculo p {
+    margin: 0 0 5px 0;
+    font-style: italic;
+    color: #666666;
+}
+
+.versiculo span {
+    font-size: 0.8rem;
+    color: #999999;
+    font-weight: 300;
+}

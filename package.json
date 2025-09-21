@@ -1,0 +1,27 @@
+{
+  "name": "convite-casamento",
+  "version": "1.0.0",
+  "description": "Site de convite de casamento com sistema de RSVP",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python3 -m http.server 8000",
+    "build": "echo 'Build completed - static files ready for deployment'",
+    "start": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "wedding",
+    "invitation",
+    "rsvp",
+    "firebase",
+    "vercel"
+  ],
+  "author": "Werisder de Souza Bertoli",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seu-usuario/convite-casamento.git"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

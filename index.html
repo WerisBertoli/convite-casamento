@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digite seu nome</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDW-QYTaP3YKyTT6xoufmSqmurCXlnuZDU",
+            authDomain: "tripfy-9f09b.firebaseapp.com",
+            projectId: "tripfy-9f09b",
+            storageBucket: "tripfy-9f09b.firebasestorage.app",
+            messagingSenderId: "789407223851",
+            appId: "1:789407223851:web:7bfb1996e8a62c4e7dda6e",
+            measurementId: "G-3RX0B0B1SV"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+        
+        // Make Firebase available globally
+        window.firebaseDB = db;
+        window.firebaseCollection = collection;
+        window.firebaseAddDoc = addDoc;
+        window.firebaseQuery = query;
+        window.firebaseWhere = where;
+        window.firebaseGetDocs = getDocs;
+    </script>
+</head>
+<body>
+    <div class="nomes-noivos">
+        <h1 id="nomes-clicaveis">MARCELLA & WERISDER</h1>
+    </div>
+    
+    <div class="input-container">
+        <input type="text" id="campo-principal" placeholder="Digite seu nome...">
+    </div>
+    
+    <p class="frase">Pedimos que confirme o mais rápido que puder, assim que tiver certeza!</p>
+    
+    <!-- Modal de RSVP -->
+    <div id="modal-rsvp" class="modal-rsvp" style="display: none;">
+        <div class="modal-content">
+            <div class="rsvp-buttons">
+                <button id="btn-confirmar" class="btn-rsvp btn-confirmar">
+                    Clique aqui e confirme sua presença!
+                </button>
+                <button id="btn-declinar" class="btn-rsvp btn-declinar">
+                    Não comparecerei
+                </button>
+            </div>
+            <button id="btn-fechar" class="btn-fechar">×</button>
+        </div>
+    </div>
+
+    <!-- Painel de Administração (oculto por padrão) -->
+    <div id="admin-panel" class="admin-panel" style="display: none;">
+        <div class="admin-content">
+            <h3>📊 Painel de Administração</h3>
+            <div class="admin-buttons">
+                <button id="ver-respostas" class="admin-btn">Ver Respostas</button>
+                <button id="limpar-dados" class="admin-btn danger">Limpar Dados</button>
+                <button id="fechar-admin" class="admin-btn">Fechar</button>
+            </div>
+            <div id="respostas-lista" class="respostas-container"></div>
+        </div>
+    </div>
+
+    <!-- Botão secreto para acessar admin (triplo clique no fundo) -->
+    <div id="admin-trigger" style="position: fixed; bottom: 10px; right: 10px; width: 30px; height: 30px; opacity: 0;"></div>
+
+    <!-- Versículo bíblico -->
+    <div class="versiculo">
+        <p>"Portanto, o que Deus ajuntou não separe o homem."</p>
+        <span>Mateus 19:6</span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
