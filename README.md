@@ -2,68 +2,69 @@
 
 Site de convite de casamento com sistema de RSVP integrado ao Firebase.
 
-## Deploy no Vercel
+## 🚀 Deploy no GitHub Pages
 
-### Opção 1: Deploy via GitHub (Recomendado)
+**✅ Já configurado! O site será publicado automaticamente.**
 
-1. **Criar repositório no GitHub:**
-   - Acesse [github.com](https://github.com)
-   - Clique em "New repository"
-   - Nome: `convite-casamento`
-   - Marque como público
-   - Clique em "Create repository"
+### Como ativar:
 
-2. **Fazer upload dos arquivos:**
-   - Na página do repositório criado, clique em "uploading an existing file"
-   - Arraste todos os arquivos do projeto:
-     - `index.html`
-     - `style.css`
-     - `script.js`
-     - `Convite_Casamento.svg`
-     - `vercel.json`
-     - `firebase-config.js`
-     - `firestore.rules`
-   - Adicione uma mensagem de commit: "Initial commit"
-   - Clique em "Commit changes"
+1. **Acesse as configurações do repositório:**
+   - Vá para: https://github.com/WerisBertoli/convite-casamento
+   - Clique em `Settings` (no menu superior)
+   - No menu lateral, clique em `Pages`
 
-3. **Deploy no Vercel:**
-   - Acesse [vercel.com](https://vercel.com)
-   - Faça login com sua conta GitHub
-   - Clique em "New Project"
-   - Selecione o repositório `convite-casamento`
-   - Clique em "Deploy"
-   - Aguarde o deploy finalizar
+2. **Configure o GitHub Pages:**
+   - Em "Source", selecione `GitHub Actions`
+   - Salve as configurações
 
-### Opção 2: Deploy Direto (Drag & Drop)
+3. **Deploy automático:**
+   - O GitHub Actions já está configurado
+   - A cada push na branch `main`, o site será atualizado automaticamente
+   - Aguarde alguns minutos para o primeiro deploy
 
-1. **Acesse o Vercel:**
-   - Vá para [vercel.com](https://vercel.com)
-   - Faça login ou crie uma conta
+4. **URL do seu site:**
+   ```
+   https://werisbertoli.github.io/convite-casamento
+   ```
 
-2. **Deploy por arrastar e soltar:**
-   - Clique em "New Project"
-   - Arraste a pasta do projeto para a área indicada
-   - Aguarde o upload e deploy automático
-
-## Configuração do Firebase
-
-Após o deploy, verifique se:
-- As configurações do Firebase estão corretas
-- O domínio do Vercel está autorizado no Firebase Console
-- As regras do Firestore estão aplicadas
-
-## Funcionalidades
+## 📱 Funcionalidades
 
 - ✅ Design responsivo para mobile
 - ✅ Sistema de RSVP com Firebase
 - ✅ Autocomplete de nomes
 - ✅ Painel administrativo (Ctrl+Shift+A)
 - ✅ Background SVG personalizado
+- ✅ Deploy automático no GitHub Pages
 
-## Tecnologias
+## 🔧 Configuração do Firebase
+
+Após o deploy, verifique se:
+- As configurações do Firebase estão corretas
+- O domínio `werisbertoli.github.io` está autorizado no Firebase Console
+- As regras do Firestore estão aplicadas
+
+### Autorizar domínio no Firebase:
+1. Acesse [Firebase Console](https://console.firebase.google.com)
+2. Selecione seu projeto
+3. Vá em `Authentication` > `Settings` > `Authorized domains`
+4. Adicione: `werisbertoli.github.io`
+
+## 🛠️ Tecnologias
 
 - HTML5
 - CSS3 (Responsivo)
 - JavaScript (ES6+)
 - Firebase Firestore
-- Vercel (Hosting)
+- GitHub Pages (Hosting)
+- GitHub Actions (CI/CD)
+
+## 📝 Como atualizar o site
+
+1. Faça as alterações nos arquivos localmente
+2. Execute os comandos:
+   ```bash
+   git add .
+   git commit -m "Descrição da alteração"
+   git push origin main
+   ```
+3. O site será atualizado automaticamente em alguns minutos
