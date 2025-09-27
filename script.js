@@ -213,12 +213,12 @@ function initAutocomplete() {
                 campo.value = nome;
                 esconderSugestoes();
                 campo.focus();
-                // Modal de RSVP removido - apenas autocomplete
-                // if (window.abrirModalRSVP) {
-                //     window.abrirModalRSVP(nome);
-                // } else {
-                //     console.error('Função abrirModalRSVP não encontrada');
-                // }
+                // Abrir modal de RSVP automaticamente ao clicar na sugestão
+                if (window.abrirModalRSVP) {
+                    window.abrirModalRSVP(nome);
+                } else {
+                    console.error('Função abrirModalRSVP não encontrada');
+                }
             });
             
             listaSugestoes.appendChild(item);
@@ -263,12 +263,12 @@ function initAutocomplete() {
             const nomeEscolhido = itens[indiceSelecionado].textContent;
             campo.value = nomeEscolhido;
             esconderSugestoes();
-            // Modal de RSVP removido - apenas autocomplete
-            // if (window.abrirModalRSVP) {
-            //     window.abrirModalRSVP(nomeEscolhido);
-            // } else {
-            //     console.error('Função abrirModalRSVP não encontrada');
-            // }
+            // Abrir modal de RSVP automaticamente ao selecionar com teclado
+            if (window.abrirModalRSVP) {
+                window.abrirModalRSVP(nomeEscolhido);
+            } else {
+                console.error('Função abrirModalRSVP não encontrada');
+            }
             return true;
         }
         return false;
@@ -385,6 +385,19 @@ function initRSVP() {
         await salvarRespostaFirestore(nomeConvidado, 'declinado');
     });
 }
+
+// Funções globais para os botões do modal
+window.confirmarPresenca = async function() {
+    console.log('Função confirmarPresenca chamada');
+    const nomeConvidado = window.nomeConvidadoAtual || 'Convidado';
+    await salvarRespostaFirestore(nomeConvidado, 'confirmado');
+};
+
+window.declinarPresenca = async function() {
+    console.log('Função declinarPresenca chamada');
+    const nomeConvidado = window.nomeConvidadoAtual || 'Convidado';
+    await salvarRespostaFirestore(nomeConvidado, 'declinado');
+};
 
 // Função abrirModalRSVP agora está definida dentro de initRSVP como window.abrirModalRSVP
 

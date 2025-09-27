@@ -49,16 +49,23 @@
     
     <!-- Modal de RSVP -->
     <div id="modal-rsvp" class="modal-rsvp" style="display: none;">
-        <div class="modal-content">
-            <div class="rsvp-buttons">
-                <button id="btn-confirmar" class="btn-rsvp btn-confirmar">
-                    Clique aqui e confirme sua presença!
+        <div class="modal-backdrop">
+            <div class="modal-content">
+                <button id="btn-fechar" class="btn-fechar" onclick="fecharModalRSVP()">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Fechar modal</span>
                 </button>
-                <button id="btn-declinar" class="btn-rsvp btn-declinar">
-                    Não comparecerei!
-                </button>
+                <div class="modal-body">
+                    <h3 class="modal-title">Sua presença é muito importante para nós!</h3>
+                    <p class="modal-text">Por favor, pedimos que confirme sua presença até <strong>10 de outubro</strong>.</p>
+                    <div class="rsvp-buttons">
+                        <button id="btn-confirmar" class="btn-rsvp btn-confirmar" onclick="confirmarPresenca()">Sim, estarei presente!</button>
+                        <button id="btn-declinar" class="btn-rsvp btn-declinar" onclick="declinarPresenca()">Não poderei comparecer</button>
+                    </div>
+                </div>
             </div>
-            <button id="btn-fechar" class="btn-fechar">×</button>
         </div>
     </div>
 
