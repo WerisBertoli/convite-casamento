@@ -103,7 +103,12 @@
             if (nomesNoivos) {
                 nomesNoivos.style.cursor = 'pointer';
                 nomesNoivos.addEventListener('click', function() {
-                    window.location.href = 'confirmados.html';
+                    const senha = prompt('Digite a senha para acessar a lista de confirmados:');
+                    if (senha === 'marcella2025' || senha === 'werisder2025' || senha === 'casamento2025') {
+                        window.location.href = 'confirmados.html';
+                    } else if (senha !== null) {
+                        alert('Senha incorreta! Tente novamente.');
+                    }
                 });
             }
         });
