@@ -394,18 +394,7 @@ function initRSVP() {
     });
 }
 
-// Funções globais para os botões do modal
-window.confirmarPresenca = async function() {
-    console.log('Função confirmarPresenca chamada');
-    const nomeConvidado = window.nomeConvidadoAtual || 'Convidado';
-    await salvarRespostaFirestore(nomeConvidado, 'confirmado');
-};
-
-window.declinarPresenca = async function() {
-    console.log('Função declinarPresenca chamada');
-    const nomeConvidado = window.nomeConvidadoAtual || 'Convidado';
-    await salvarRespostaFirestore(nomeConvidado, 'declinado');
-};
+// Funções globais removidas - agora usando apenas os event listeners dentro de initRSVP
 
 // Função abrirModalRSVP agora está definida dentro de initRSVP como window.abrirModalRSVP
 
