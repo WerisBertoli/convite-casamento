@@ -1,21 +1,5 @@
-// Lista de nomes para autocomplete - Casamento (Espírito Santo + Goiânia)
-const listaNomes = [
-    // Espírito Santo
-    'Wesley Bertoli', 'Leila Venturini', 'Nathiely Bertoli', 'Nathan Bertoli', 'Camila Magnago', 'Edjane Bertoli', 'Cilas Sepulchro', 'João Lucas Bertoli',
-    'Kamily Castro', 'João Marcos Bertoli', 'Welligton Bertoli', 'Alice Goldner', 'Maria Eloisa Goldner', 'Korrinna Bertoli', 'Penha Caliari',
-    'Narciso Bertoli', 'Anatilde', 'José Caliari', 'Dheyner Bertoli', 'Ricardo', 'Rodrigo Bertoli', 'Ana Julia Flores',
-    'Thauana Bertoli', 'Bruna', 'Zezim', 'Sandra', 'Juraci', 'Servolo', 'Charles', 'Sueli De Souza',
-    'Eduardo Scardua', 'Lisley Bertoli', 'Silvio De Souza', 'Simone Gempka', 'Bryan Gempka', 'Kethelyn Gempka',
-    'Leandro De Souza', 'Nilza', 'Hulyana', 'Leonardo', 'João Victor', 'Ana Claudia', 'Ilza De Souza', 'Luca Lonardi', 'Laíssa Soares', 'Luiz De Souza', 'Maria Clara', 'Cinthia De Souza' ,  
-    
-    // Goiânia
-    'Helena Nunes', 'Antônio Nunes', 'Milene Nunes', 'Eduarda Zabelly Nunes', 'Marcos Nunes', 'Liciene Rodrigues', 'Dudu Nunes',
-    'Douglas Nunes', 'Lucas Nunes', 'Vilma Rodrigues', 'Marisa Nunes', 'Carlos Araujo', 'Alexya', 'Carol',
-    'Neison', 'Moises', 'Simon', 'Benedito', 'Ilza Nunes', 'Breno Nunes', 'Rabeche',
-    'Maria Julia', 'Augusto', 'Italo', 'Delandia', 'Nazaré', 'Gabriel Nunes',
-    'Mariana', 'Belchior', 'Dark', 'Giovana Nunes','Lucia Nunes', 'Davi', 'Gislaine', 'Israel', 'Giovana',
-    'Fernanda', 'Junim', 'Marcelo', 'Vitoria', 'Jose Henrique','Renata', 'Guilherme Soares', 'Luiz Neto','Thalys', 'Abio', 'Ayte','Fatima', 'Selma', 'Regina', 'Cleyton', 'Wivian', 'Caio', 'Manuela', 'Wellington Nunes', 'Ana Julia Soares', 'Guilherme Santos', 'Emanuelly Nunes', 'Luiz Paula', 'Neia','Osman', 'Isac', 'Rafaela', 'Samylla', 
-];
+// Lista de nomes importada do arquivo lista-nomes.js
+// A lista está disponível globalmente através de window.listaNomes
 
 // Aguarda o carregamento completo da página
 document.addEventListener('DOMContentLoaded', function() {
@@ -402,6 +386,9 @@ function initRSVP() {
 const cacheConfirmacoes = new Map();
 const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutos
 
+// Flag para prevenir múltiplas execuções simultâneas
+let salvandoResposta = false;
+
 // Função para limpar cache expirado
 function limparCacheExpirado() {
     const agora = Date.now();
@@ -478,6 +465,14 @@ async function verificarConfirmacaoPrevia(nomeConvidado) {
 
 // Função para salvar resposta no Firebase
 async function salvarRespostaFirestore(nomeConvidado, resposta) {
+    // Verificar se já está salvando para evitar execuções simultâneas
+    if (salvandoResposta) {
+        console.log('⚠️ Salvamento já em progresso, ignorando nova tentativa');
+        return;
+    }
+    
+    salvandoResposta = true;
+    
     try {
         // ✅ FIREBASE ATIVO - Sistema de banco de dados funcionando
         console.log('🔥 Firebase ativo - salvando no banco de dados');
@@ -488,25 +483,20 @@ async function salvarRespostaFirestore(nomeConvidado, resposta) {
             throw new Error('Firebase não inicializado. Verifique as regras do Firestore.');
         }
         
-        // Verificar novamente se já confirmou (dupla verificação)
-        try {
-            await verificarConfirmacaoPrevia(nomeConvidado);
-            console.log('✅ Verificação de duplicatas passou - prosseguindo com salvamento');
-        } catch (verificacaoError) {
-            console.error('❌ Erro na verificação de duplicatas:', verificacaoError);
-            
-            if (verificacaoError.message.includes('já existe')) {
-                mostrarMensagemRSVP('✨ Sua presença já foi confirmada anteriormente! 💕', 'sucesso');
-            } else {
-                mostrarMensagemRSVP('⚠️ ' + verificacaoError.message, 'erro');
-            }
-            
-            window.fecharModalRSVP();
-            return;
-        }
-        
-        // Verificação adicional: buscar por nome exato no Firebase antes de salvar
+        // Verificação única e robusta de duplicatas
         const nomeNormalizado = nomeConvidado.toLowerCase().trim();
+        
+        // Verificar cache local primeiro
+         const cacheEntry = cacheConfirmacoes.get(nomeNormalizado);
+         if (cacheEntry && (Date.now() - cacheEntry.timestamp) < CACHE_EXPIRY && cacheEntry.confirmado) {
+             console.log('❌ Duplicata detectada no cache');
+             mostrarMensagemRSVP('✨ Sua presença já foi confirmada anteriormente! 💕', 'sucesso');
+             window.fecharModalRSVP();
+             salvandoResposta = false;
+             return;
+         }
+        
+        // Verificação final no Firebase antes de salvar
         const q = window.firebaseQuery(
             window.firebaseCollection(window.firebaseDB, 'rsvp'),
             window.firebaseWhere('nome', '==', nomeNormalizado)
@@ -514,11 +504,19 @@ async function salvarRespostaFirestore(nomeConvidado, resposta) {
         
         const querySnapshot = await window.firebaseGetDocs(q);
         if (!querySnapshot.empty) {
-            console.log('❌ Duplicata detectada no momento do salvamento');
+            console.log('❌ Duplicata detectada no Firebase no momento do salvamento');
+            // Atualizar cache para evitar futuras consultas
+            cacheConfirmacoes.set(nomeNormalizado, {
+                confirmado: true,
+                timestamp: Date.now()
+            });
             mostrarMensagemRSVP('✨ Sua presença já foi confirmada anteriormente! 💕', 'sucesso');
-            window.fecharModalRSVP();
-            return;
+             window.fecharModalRSVP();
+             salvandoResposta = false;
+             return;
         }
+        
+        console.log('✅ Verificação de duplicatas passou - prosseguindo com salvamento');
         
         // Dados para salvar no Firebase
         const dadosFirebase = {
@@ -564,6 +562,9 @@ async function salvarRespostaFirestore(nomeConvidado, resposta) {
         
         console.log('❌ Falha ao salvar no banco de dados');
         window.fecharModalRSVP();
+    } finally {
+        // Sempre resetar o flag, independente de sucesso ou erro
+        salvandoResposta = false;
     }
 }
 

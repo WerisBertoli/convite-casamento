@@ -291,30 +291,15 @@
         </div>
     </div>
 
+    <!-- Lista centralizada de nomes -->
+    <script src="lista-nomes.js"></script>
+
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getFirestore, collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         
-        // Lista de nomes convidados (mesma do index.html)
-        const listaNomes = [
-            // Espírito Santo
-            'Wesley Bertoli', 'Leila Venturini', 'Nathiely Bertoli', 'Nathan Bertoli', 'Camila Magnago', 'Edjane Bertoli', 'Cilas Sepulchro', 'João Lucas Bertoli',
-            'Kamily Castro', 'João Marcos Bertoli', 'Welligton Bertoli', 'Alice Goldner', 'Maria Eloisa Goldner', 'Korrinna Bertoli', 'Penha Caliari',
-            'Narciso Bertoli', 'Anatilde', 'José Caliari', 'Dheyner Bertoli', 'Ricardo', 'Rodrigo Bertoli', 'Ana Julia Flores',
-            'Thauana Bertoli', 'Bruna', 'Zezim', 'Sandra', 'Juraci', 'Servolo', 'Charles', 'Sueli De Souza',
-            'Eduardo Scardua', 'Lisley Bertoli', 'Silvio De Souza', 'Simone Gempka', 'Bryan Gempka', 'Kethelyn Gempka',
-            'Leandro De Souza', 'Nilza', 'Hulyana', 'Leonardo', 'João Victor', 'Ana Claudia', 'Ilza De Souza', 'Luca Lonardi', 'Laíssa Soares', 'Luiz De Souza', 'Maria Clara', 'Cinthia De Souza',
-            
-            // Goiânia
-            'Helena Nunes', 'Antônio Nunes', 'Milene Nunes', 'Eduarda Zabelly Nunes', 'Marcos Nunes', 'Liciene Rodrigues', 'Dudu Nunes',
-            'Douglas Nunes', 'Lucas Nunes', 'Vilma Rodrigues', 'Marisa Nunes', 'Carlos Araujo', 'Alexya', 'Carol',
-            'Neison', 'Moises', 'Simon', 'Benedito', 'Ilza Nunes', 'Breno Nunes', 'Rabeche',
-            'Maria Julia', 'Augusto', 'Italo', 'Delandia', 'Nazaré', 'Gabriel Nunes',
-            'Mariana', 'Belchior', 'Dark', 'Giovana Nunes', 'Wallace Nunes', 'Monique', 'Lucia Nunes',
-            'Juliana', 'Leo', 'Davi', 'Gislaine', 'Israel', 'Giovana',
-            'Fernanda', 'Junim', 'Marcelo', 'Vitoria', 'Jose Henrique', 'Jose Eloi',
-            'Beni', 'Renata', 'Guilherme Soares', 'Luiz Neto', 'Jose Junior', 'Janaina', 'Beatriz', 'Davi Eloi', 'Antônio Filho', 'Thalys', 'Abio', 'Ayte', 'Abadia', 'Ilda', 'Fatima', 'Selma', 'Regina', 'Cleyton', 'Wivian', 'Caio', 'Manuela', 'Wellington Nunes', 'Ana Julia Soares','Ana Julya Alves', 'Guilherme Santos', 'Emanuelly Nunes', 'Marina Machado', 'Luiz Paula', 'Neia','Osman', 'Isac', 'Rafaela', 'Samylla'
-        ];
+        // Lista de nomes importada do arquivo lista-nomes.js
+        // A lista está disponível globalmente através de window.listaNomes
         
         // Firebase configuration - mesma da página principal
         const firebaseConfig = {
