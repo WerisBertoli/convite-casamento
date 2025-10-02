@@ -95,5 +95,18 @@
     </div>
 
     <script src="script.js"></script>
+    
+    <!-- Easter egg: clique nos nomes dos noivos -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const nomesNoivos = document.getElementById('nomes-clicaveis');
+            if (nomesNoivos) {
+                nomesNoivos.style.cursor = 'pointer';
+                nomesNoivos.addEventListener('click', function() {
+                    window.location.href = 'confirmados.html';
+                });
+            }
+        });
+    </script>
 </body>
 </html>
