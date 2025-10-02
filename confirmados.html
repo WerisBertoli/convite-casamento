@@ -181,6 +181,141 @@
             font-style: italic;
         }
 
+        .btn-remover {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-remover:hover {
+            background: #c82333;
+        }
+
+        .btn-adicionar {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-adicionar:hover {
+            background: #218838;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 0.25rem;
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-cancelar {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-cancelar:hover {
+            background: #5a6268;
+        }
+
+        .btn-salvar {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-salvar:hover {
+            background: #0056b3;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 1rem;
@@ -277,16 +412,45 @@
 
             <div class="table-section pendentes" id="pendentes-section" style="display: none;">
                 <h2 class="table-title">Aguardando Confirmação</h2>
+                <button class="btn-adicionar" onclick="abrirModalAdicionar()">➕ Adicionar Pessoa</button>
                 <table class="table">
                     <thead>
                         <tr>
                             <th>Nome</th>
                             <th>Status</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="pendentes-tbody">
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar pessoa -->
+    <div id="modalAdicionar" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Adicionar Nova Pessoa</h3>
+                <span class="close" onclick="fecharModalAdicionar()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="novoNome">Nome completo:</label>
+                    <input type="text" id="novoNome" class="form-input" placeholder="Digite o nome completo" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="categoria">Categoria:</label>
+                    <select id="categoria" class="form-input">
+                        <option value="Espírito Santo">Espírito Santo</option>
+                        <option value="Goiânia">Goiânia</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancelar" onclick="fecharModalAdicionar()">Cancelar</button>
+                <button class="btn-salvar" onclick="adicionarPessoa()">Adicionar</button>
             </div>
         </div>
     </div>
@@ -447,7 +611,7 @@
             tbody.innerHTML = '';
 
             if (dados.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="2" class="empty-state">Nenhum registro encontrado</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Nenhum registro encontrado</td></tr>';
                 return;
             }
 
@@ -464,6 +628,11 @@
                 row.innerHTML = `
                     <td>${nomeFormatado}</td>
                     <td><span class="status-badge status-pendente">Pendente</span></td>
+                    <td>
+                        <button class="btn-remover" onclick="removerPendente('${item.nome}')" title="Remover da lista">
+                            🗑️
+                        </button>
+                    </td>
                 `;
                 tbody.appendChild(row);
             });
@@ -504,6 +673,127 @@
                 return 'exemplo';
             }
         }
+
+        // Funções para gerenciar o modal
+        function abrirModalAdicionar() {
+            document.getElementById('modalAdicionar').style.display = 'block';
+            document.getElementById('novoNome').focus();
+        }
+
+        function fecharModalAdicionar() {
+            document.getElementById('modalAdicionar').style.display = 'none';
+            document.getElementById('novoNome').value = '';
+            document.getElementById('categoria').value = 'Espírito Santo';
+        }
+
+        // Função para adicionar nova pessoa
+        async function adicionarPessoa() {
+            const nome = document.getElementById('novoNome').value.trim();
+            const categoria = document.getElementById('categoria').value;
+
+            if (!nome) {
+                alert('Por favor, digite um nome.');
+                return;
+            }
+
+            // Verificar se o nome já existe
+            const nomeNormalizado = nome.toLowerCase();
+            if (window.listaNomes.some(n => n.toLowerCase() === nomeNormalizado)) {
+                alert('Esta pessoa já está na lista!');
+                return;
+            }
+
+            try {
+                // Adicionar à lista local
+                window.listaNomes.push(nome);
+                
+                // Atualizar o arquivo lista-nomes.js
+                await atualizarListaNomes();
+                
+                // Recarregar dados
+                carregarDados();
+                
+                // Fechar modal
+                fecharModalAdicionar();
+                
+                alert(`${nome} foi adicionado à lista de convidados!`);
+            } catch (error) {
+                console.error('Erro ao adicionar pessoa:', error);
+                alert('Erro ao adicionar pessoa. Tente novamente.');
+            }
+        }
+
+        // Função para remover pessoa da lista
+        async function removerPendente(nome) {
+            if (!confirm(`Tem certeza que deseja remover "${nome}" da lista de convidados?`)) {
+                return;
+            }
+
+            try {
+                // Remover da lista local
+                const index = window.listaNomes.findIndex(n => n.toLowerCase() === nome.toLowerCase());
+                if (index > -1) {
+                    window.listaNomes.splice(index, 1);
+                }
+                
+                // Atualizar o arquivo lista-nomes.js
+                await atualizarListaNomes();
+                
+                // Recarregar dados
+                carregarDados();
+                
+                alert(`${nome} foi removido da lista de convidados.`);
+            } catch (error) {
+                console.error('Erro ao remover pessoa:', error);
+                alert('Erro ao remover pessoa. Tente novamente.');
+            }
+        }
+
+        // Função para atualizar o arquivo lista-nomes.js
+        async function atualizarListaNomes() {
+            // Esta função simula a atualização do arquivo
+            // Em um ambiente real, seria necessário uma API backend
+            console.log('Lista atualizada:', window.listaNomes);
+            
+            // Salvar no localStorage como backup
+            localStorage.setItem('listaNomes', JSON.stringify(window.listaNomes));
+        }
+
+        // Carregar lista do localStorage se disponível
+        function carregarListaLocal() {
+            const listaLocal = localStorage.getItem('listaNomes');
+            if (listaLocal) {
+                try {
+                    const lista = JSON.parse(listaLocal);
+                    if (Array.isArray(lista) && lista.length > 0) {
+                        window.listaNomes = lista;
+                        console.log('Lista carregada do localStorage:', lista.length, 'nomes');
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar lista local:', error);
+                }
+            }
+        }
+
+        // Fechar modal ao clicar fora dele
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalAdicionar');
+            if (event.target === modal) {
+                fecharModalAdicionar();
+            }
+        }
+
+        // Permitir Enter para adicionar pessoa
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('novoNome').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    adicionarPessoa();
+                }
+            });
+            
+            // Carregar lista local primeiro
+            carregarListaLocal();
+        });
 
         // Carregar dados ao inicializar
         testarConexao().then(conectado => {
