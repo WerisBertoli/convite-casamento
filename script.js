@@ -13,10 +13,8 @@ const listaNomes = [
     'Douglas Nunes', 'Lucas Nunes', 'Vilma Rodrigues', 'Marisa Nunes', 'Carlos Araujo', 'Alexya', 'Carol',
     'Neison', 'Moises', 'Simon', 'Benedito', 'Ilza Nunes', 'Breno Nunes', 'Rabeche',
     'Maria Julia', 'Augusto', 'Italo', 'Delandia', 'Nazaré', 'Gabriel Nunes',
-    'Mariana', 'Belchior', 'Dark', 'Giovana Nunes', 'Wallace Nunes', 'Monique', 'Lucia Nunes',
-    'Juliana', 'Leo', 'Davi', 'Gislaine', 'Israel', 'Giovana',
-    'Fernanda', 'Junim', 'Marcelo', 'Vitoria', 'Jose Henrique', 'Jose Eloi',
-    'Beni', 'Renata', 'Guilherme Soares', 'Luiz Neto', 'Jose Junior', 'Janaina', 'Beatriz', 'Davi Eloi', 'Antônio Filho', 'Thalys', 'Abio', 'Ayte', 'Abadia', 'Ilda', 'Fatima', 'Selma', 'Regina', 'Cleyton', 'Wivian', 'Caio', 'Manuela', 'Wellington Nunes', 'Ana Julia Soares','Ana Julya Alves', 'Guilherme Santos', 'Emanuelly Nunes', 'Marina Machado', 'Luiz Paula', 'Neia','Osman', 'Isac', 'Rafaela', 'Samylla', 
+    'Mariana', 'Belchior', 'Dark', 'Giovana Nunes','Lucia Nunes', 'Davi', 'Gislaine', 'Israel', 'Giovana',
+    'Fernanda', 'Junim', 'Marcelo', 'Vitoria', 'Jose Henrique','Renata', 'Guilherme Soares', 'Luiz Neto','Thalys', 'Abio', 'Ayte','Fatima', 'Selma', 'Regina', 'Cleyton', 'Wivian', 'Caio', 'Manuela', 'Wellington Nunes', 'Ana Julia Soares', 'Guilherme Santos', 'Emanuelly Nunes', 'Luiz Paula', 'Neia','Osman', 'Isac', 'Rafaela', 'Samylla', 
 ];
 
 // Aguarda o carregamento completo da página
@@ -212,7 +210,10 @@ function initAutocomplete() {
             item.addEventListener('click', () => {
                 campo.value = nome;
                 esconderSugestoes();
-                campo.focus();
+                
+                // Fechar teclado virtual em dispositivos móveis
+                campo.blur();
+                
                 // Abrir modal de RSVP automaticamente ao clicar na sugestão
                 if (window.abrirModalRSVP) {
                     window.abrirModalRSVP(nome);
@@ -515,9 +516,24 @@ async function salvarRespostaFirestore(nomeConvidado, resposta) {
             return;
         }
         
+        // Verificação adicional: buscar por nome exato no Firebase antes de salvar
+        const nomeNormalizado = nomeConvidado.toLowerCase().trim();
+        const q = window.firebaseQuery(
+            window.firebaseCollection(window.firebaseDB, 'rsvp'),
+            window.firebaseWhere('nome', '==', nomeNormalizado)
+        );
+        
+        const querySnapshot = await window.firebaseGetDocs(q);
+        if (!querySnapshot.empty) {
+            console.log('❌ Duplicata detectada no momento do salvamento');
+            mostrarMensagemRSVP('✨ Sua presença já foi confirmada anteriormente! 💕', 'sucesso');
+            window.fecharModalRSVP();
+            return;
+        }
+        
         // Dados para salvar no Firebase
         const dadosFirebase = {
-            nome: nomeConvidado.toLowerCase().trim(),
+            nome: nomeNormalizado,
             resposta: resposta,
             dataResposta: new Date().toISOString(),
             timestamp: Date.now(),
@@ -529,7 +545,6 @@ async function salvarRespostaFirestore(nomeConvidado, resposta) {
         console.log('✅ Dados salvos com sucesso no Firebase');
         
         // Atualizar cache após salvamento bem-sucedido
-        const nomeNormalizado = nomeConvidado.toLowerCase().trim();
         cacheConfirmacoes.set(nomeNormalizado, {
             confirmado: true,
             timestamp: Date.now()
