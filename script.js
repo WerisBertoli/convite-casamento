@@ -6,7 +6,7 @@ const listaNomes = [
     'Narciso Bertoli', 'Anatilde', 'José Caliari', 'Dheyner Bertoli', 'Ricardo', 'Rodrigo Bertoli', 'Ana Julia Flores',
     'Thauana Bertoli', 'Bruna', 'Zezim', 'Sandra', 'Juraci', 'Servolo', 'Charles', 'Sueli De Souza',
     'Eduardo Scardua', 'Lisley Bertoli', 'Silvio De Souza', 'Simone Gempka', 'Bryan Gempka', 'Kethelyn Gempka',
-    'Leandro De Souza', 'Nilza', 'Hulyana', 'Leonardo', 'João Victor', 'Ana Claudia', 'Ilza De Souza', 'Luca Lonardi', 'Laíssa Soares', 'Luiz De Souza', 
+    'Leandro De Souza', 'Nilza', 'Hulyana', 'Leonardo', 'João Victor', 'Ana Claudia', 'Ilza De Souza', 'Luca Lonardi', 'Laíssa Soares', 'Luiz De Souza', 'Maria Clara', 'Cinthia De Souza' ,  
     
     // Goiânia
     'Helena Nunes', 'Antônio Nunes', 'Milene Nunes', 'Eduarda Zabelly Nunes', 'Marcos Nunes', 'Liciene Rodrigues', 'Dudu Nunes',
@@ -16,7 +16,7 @@ const listaNomes = [
     'Mariana', 'Belchior', 'Dark', 'Giovana Nunes', 'Wallace Nunes', 'Monique', 'Lucia Nunes',
     'Juliana', 'Leo', 'Davi', 'Gislaine', 'Israel', 'Giovana',
     'Fernanda', 'Junim', 'Marcelo', 'Vitoria', 'Jose Henrique', 'Jose Eloi',
-    'Beni', 'Renata', 'Guilherme Soares', 'Luiz Neto', 'Jose Junior', 'Janaina', 'Beatriz', 'Davi Eloi', 'Antônio Filho', 'Thalys', 'Abio', 'Ayte', 'Abadia', 'Ilda', 'Fatima', 'Selma', 'Regina', 'Cleyton', 'Wivian', 'Caio', 'Manuela', 'Wellington Nunes', 'Ana Julia Soares','Ana Julya Alves', 'Guilherme Santos', 'Emanuelly Nunes', 'Marina Machado', 'Luiz Paula',
+    'Beni', 'Renata', 'Guilherme Soares', 'Luiz Neto', 'Jose Junior', 'Janaina', 'Beatriz', 'Davi Eloi', 'Antônio Filho', 'Thalys', 'Abio', 'Ayte', 'Abadia', 'Ilda', 'Fatima', 'Selma', 'Regina', 'Cleyton', 'Wivian', 'Caio', 'Manuela', 'Wellington Nunes', 'Ana Julia Soares','Ana Julya Alves', 'Guilherme Santos', 'Emanuelly Nunes', 'Marina Machado', 'Luiz Paula', 'Neia','Osman', 'Isac', 'Rafaela', 'Samylla', 
 ];
 
 // Aguarda o carregamento completo da página
@@ -401,31 +401,81 @@ window.declinarPresenca = async function() {
 
 // Função abrirModalRSVP agora está definida dentro de initRSVP como window.abrirModalRSVP
 
+// Cache local para evitar verificações desnecessárias
+const cacheConfirmacoes = new Map();
+const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutos
+
+// Função para limpar cache expirado
+function limparCacheExpirado() {
+    const agora = Date.now();
+    for (const [key, entry] of cacheConfirmacoes.entries()) {
+        if ((agora - entry.timestamp) >= CACHE_EXPIRY) {
+            cacheConfirmacoes.delete(key);
+            console.log('🗑️ Cache expirado removido para:', key);
+        }
+    }
+}
+
+// Limpar cache expirado a cada 2 minutos
+setInterval(limparCacheExpirado, 2 * 60 * 1000);
+
 // Função para verificar se o convidado já confirmou presença no Firestore
 async function verificarConfirmacaoPrevia(nomeConvidado) {
+    const nomeNormalizado = nomeConvidado.toLowerCase().trim();
+    
+    // Verificar cache local primeiro
+    const cacheKey = nomeNormalizado;
+    const cacheEntry = cacheConfirmacoes.get(cacheKey);
+    
+    if (cacheEntry && (Date.now() - cacheEntry.timestamp) < CACHE_EXPIRY) {
+        console.log('📋 Usando cache para:', nomeConvidado, '- Resultado:', cacheEntry.confirmado);
+        if (cacheEntry.confirmado) {
+            throw new Error('Confirmação já existe (cache)');
+        }
+        return false;
+    }
+    
     try {
         if (!window.firebaseDB) {
             console.warn('Firebase não inicializado, aplicando regras do firestore.rules');
-            return false;
+            throw new Error('Firebase não disponível');
         }
+        
+        console.log('🔍 Verificando no Firebase para:', nomeConvidado);
         
         const q = window.firebaseQuery(
             window.firebaseCollection(window.firebaseDB, 'rsvp'),
-            window.firebaseWhere('nome', '==', nomeConvidado.toLowerCase().trim())
+            window.firebaseWhere('nome', '==', nomeNormalizado)
         );
         
         const querySnapshot = await window.firebaseGetDocs(q);
         
-        if (!querySnapshot.empty) {
+        const jaConfirmou = !querySnapshot.empty;
+        
+        // Atualizar cache
+        cacheConfirmacoes.set(cacheKey, {
+            confirmado: jaConfirmou,
+            timestamp: Date.now()
+        });
+        
+        if (jaConfirmou) {
             console.log('✅ Confirmação encontrada no banco de dados para:', nomeConvidado);
-            return true;
+            throw new Error('Confirmação já existe no Firebase');
         }
         
+        console.log('✅ Nenhuma confirmação prévia encontrada para:', nomeConvidado);
         return false;
+        
     } catch (error) {
-        console.error('Erro ao verificar confirmação prévia no Firebase:', error);
+        if (error.message.includes('Confirmação já existe')) {
+            throw error; // Re-lançar erros de duplicata
+        }
+        
+        console.error('❌ Erro ao verificar confirmação prévia no Firebase:', error);
         console.warn('⚠️ Verifique se as regras do Firestore estão aplicadas corretamente');
-        return false;
+        
+        // Em caso de erro de conectividade, não permitir salvamento para evitar duplicatas
+        throw new Error('Não foi possível verificar confirmações prévias. Tente novamente.');
     }
 }
 
@@ -442,9 +492,18 @@ async function salvarRespostaFirestore(nomeConvidado, resposta) {
         }
         
         // Verificar novamente se já confirmou (dupla verificação)
-        const jaConfirmou = await verificarConfirmacaoPrevia(nomeConvidado);
-        if (jaConfirmou) {
-            mostrarMensagemRSVP('✨ Sua presença já foi confirmada anteriormente! 💕', 'sucesso');
+        try {
+            await verificarConfirmacaoPrevia(nomeConvidado);
+            console.log('✅ Verificação de duplicatas passou - prosseguindo com salvamento');
+        } catch (verificacaoError) {
+            console.error('❌ Erro na verificação de duplicatas:', verificacaoError);
+            
+            if (verificacaoError.message.includes('já existe')) {
+                mostrarMensagemRSVP('✨ Sua presença já foi confirmada anteriormente! 💕', 'sucesso');
+            } else {
+                mostrarMensagemRSVP('⚠️ ' + verificacaoError.message, 'erro');
+            }
+            
             window.fecharModalRSVP();
             return;
         }
@@ -461,6 +520,14 @@ async function salvarRespostaFirestore(nomeConvidado, resposta) {
         console.log('💾 Salvando no Firebase:', dadosFirebase);
         await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB, 'rsvp'), dadosFirebase);
         console.log('✅ Dados salvos com sucesso no Firebase');
+        
+        // Atualizar cache após salvamento bem-sucedido
+        const nomeNormalizado = nomeConvidado.toLowerCase().trim();
+        cacheConfirmacoes.set(nomeNormalizado, {
+            confirmado: true,
+            timestamp: Date.now()
+        });
+        console.log('📋 Cache atualizado para:', nomeConvidado);
         
         // Mostrar mensagem de sucesso
         if (resposta === 'confirmado') {

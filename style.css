@@ -125,19 +125,47 @@ html {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
+    width: 100vw;
     height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: visible;
     background: transparent;
+    padding: 1rem;
+    box-sizing: border-box;
 }
 
 .modal-backdrop {
     position: relative;
-    padding: 1rem;
     width: 100%;
     max-width: 28rem;
-    max-height: 100%;
+    max-height: calc(100vh - 2rem);
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ajustes para dispositivos móveis */
+@media (max-width: 640px) {
+    .modal-rsvp {
+        padding: 0.75rem;
+        align-items: center;
+    }
+    
+    .modal-backdrop {
+        max-width: 100%;
+        max-height: calc(100vh - 1.5rem);
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-rsvp {
+        padding: 0.5rem;
+        align-items: center;
+    }
+    
+    .modal-backdrop {
+        max-height: calc(100vh - 1rem);
+    }
 }
 
 .modal-content {
@@ -198,6 +226,18 @@ html {
     }
 }
 
+@media (max-width: 640px) {
+    .modal-body {
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-body {
+        padding: 0.5rem;
+    }
+}
+
 .modal-title {
     margin-bottom: 1.25rem;
     font-size: 1.125rem;
@@ -232,6 +272,18 @@ html {
     }
 }
 
+@media (max-width: 640px) {
+    .rsvp-buttons {
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .rsvp-buttons {
+        gap: 0.75rem;
+    }
+}
+
 .btn-rsvp {
     padding: 0.625rem 1.25rem;
     font-size: 0.875rem;
@@ -247,6 +299,23 @@ html {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+}
+
+@media (max-width: 640px) {
+    .btn-rsvp {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn-rsvp {
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+        min-height: 50px;
+        width: 100%;
+    }
 }
 
 .btn-confirmar {
