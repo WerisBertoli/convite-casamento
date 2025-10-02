@@ -340,16 +340,23 @@ function initRSVP() {
         console.log('Abrindo modal para:', nomeConvidado);
         window.nomeConvidadoAtual = nomeConvidado;
         
-        // Verificar se já confirmou presença no Firebase
-        const jaConfirmou = await verificarConfirmacaoPrevia(nomeConvidado);
-        
-        if (jaConfirmou) {
-            mostrarMensagemRSVP('✨ Sua presença já foi confirmada! Obrigado! 💕', 'sucesso');
-            return;
+        try {
+            // Verificar se já confirmou presença no Firebase
+            await verificarConfirmacaoPrevia(nomeConvidado);
+            
+            // Se chegou até aqui, não há confirmação prévia
+            modalRSVP.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+        } catch (error) {
+            if (error.message.includes('Confirmação já existe')) {
+                mostrarMensagemRSVP('✨ Sua presença já foi confirmada! Obrigado! 💕', 'sucesso');
+                return;
+            } else {
+                mostrarMensagemRSVP('❌ Erro ao verificar confirmação. Tente novamente.', 'erro');
+                return;
+            }
         }
-        
-        modalRSVP.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
     };
     
 
