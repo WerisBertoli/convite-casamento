@@ -25,6 +25,24 @@
         const firebaseConfig = { apiKey: "AIzaSyDW-QYTaP3YKyTT6xoufmSqmurCXlnuZDU", authDomain: "tripfy-9f09b.firebaseapp.com", projectId: "tripfy-9f09b", storageBucket: "tripfy-9f09b.firebasestorage.app", messagingSenderId: "789407223851", appId: "1:789407223851:web:7bfb1996e8a62c4e7dda6e", measurementId: "G-3RX0B0B1SV" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        (async () => {
+            const q0 = new URLSearchParams(location.search);
+            const r0 = q0.get('receipt_url');
+            if (r0) {
+                try {
+                    const info0 = { transactionId: q0.get('transaction_id'), orderNsu: q0.get('order_nsu'), slug: q0.get('slug'), receiptUrl: r0, captureMethod: q0.get('capture_method'), verified: false };
+                    localStorage.setItem('paymentReturn', JSON.stringify(info0));
+                } catch (e) {}
+                document.documentElement.style.visibility = 'hidden';
+                const id0 = q0.get('order_nsu');
+                try {
+                    if (id0) {
+                        await setDoc(doc(db, 'gifts', id0), { status: 'sold', transaction_nsu: q0.get('transaction_id') || '', slug: q0.get('slug') || '', capture_method: q0.get('capture_method') || '', receipt_url: r0, source: 'redirect', updatedAt: new Date().toISOString() }, { merge: true });
+                    }
+                } catch (e) {}
+                window.location.replace(r0);
+            }
+        })();
         document.addEventListener('DOMContentLoaded', async function(){
 
             const presentes = [
