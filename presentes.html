@@ -53,59 +53,67 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function(){
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, getDocs, setDoc, doc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        const firebaseConfig = { apiKey: "AIzaSyDW-QYTaP3YKyTT6xoufmSqmurCXlnuZDU", authDomain: "tripfy-9f09b.firebaseapp.com", projectId: "tripfy-9f09b", storageBucket: "tripfy-9f09b.firebasestorage.app", messagingSenderId: "789407223851", appId: "1:789407223851:web:7bfb1996e8a62c4e7dda6e", measurementId: "G-3RX0B0B1SV" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        document.addEventListener('DOMContentLoaded', async function(){
 
             const presentes = [
-                { id: 'ajuda-lua-mel', titulo: 'Ajuda na Lua de Mel', preco: 300, imagem: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_LUA_MEL' },
-                { id: 'jantar-romantico', titulo: 'Jantar romântico', preco: 350, imagem: 'https://www.receitasja.com.br/wp-content/uploads/2025/06/jantar-romantico-1140x597.jpg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_JANTAR' },
-                { id: 'noite-cinema', titulo: 'Noite de cinema em casa', preco: 160, imagem: 'https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?q=80&w=1200&auto=format&fit=crop', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_CINEMA' },
-                { id: 'cafe-manha', titulo: 'Café da manhã na cama', preco: 120, imagem: 'https://acquaaroma.venusdigital.com.br/wp-content/uploads/2025/05/cafe-manha-cama.webp', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_CAFE' },
-                { id: 'pizza-night', titulo: 'Noite da pizza', preco: 120, imagem: 'https://anamariareceitas.com.br/wp-content/uploads/2023/08/Dicas-para-uma-noite-de-pizza-1.jpg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_PIZZA' },
-                { id: 'dia-noivo', titulo: 'Dia do Noivo (barbearia & spa)', preco: 350, imagem: 'https://lapisdenoiva.com/wp-content/uploads/2024/05/barbearia-noivo.jpg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_DIA_NOIVO' },
-                { id: 'dia-noiva', titulo: 'Dia da Noiva (cabelo & spa)', preco: 600, imagem: 'https://fisioderme.com.br/wp-content/uploads/2021/10/Bridal-checklist.png', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_DIA_NOIVA' },
-                { id: 'curso-danca', titulo: 'Curso de dança do casal', preco: 250, imagem: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1200&auto=format&fit=crop', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_DANCA' },
-                { id: 'picnic', titulo: 'Piquenique no parque', preco: 150, imagem: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgPCJxCQ329IZ471nRqo7O2HQCyaiW4UyMEg&s', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_PICNIC' },
-                { id: 'bike', titulo: 'Passeio de bicicleta', preco: 100, imagem: 'https://cdn-hweb.hsystem.com.br/5fdcc5cdacb69449bcc87151/5fa0837cf5614fbebaa05e02c80d4478.jpg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_BIKE' },
-                { id: 'spa-casal', titulo: 'Spa do casal', preco: 700, imagem: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=1200&auto=format&fit=crop', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_SPA' },
-                { id: 'passeio-barco', titulo: 'Passeio de barco', preco: 500, imagem: 'https://imagedelivery.net/EafvxYlk8cSUsWEWsetEdQ/ae2daa61-ca39-4d51-598f-ca812433de00/w=1000', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_BARCO' },
-                { id: 'sessao-fotos', titulo: 'Sessão de fotos do casal', preco: 800, imagem: 'https://www.temporadaempiri.com.br/media/648e6d604e9634e71e9a83fc/md', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_FOTOS' },
-                { id: 'gasolina', titulo: 'Gasolina para viagens a dois', preco: 200, imagem: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHJf1yYzI8Pjk_v9GMtIZiz5viWRbVs8zE67O0D2o-_8zhCmV0Pgqfm7VJcZUAAWDHc-w&usqp=CAU', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_GASOLINA' },
-                { id: 'uber', titulo: 'Uber pós-festa', preco: 150, imagem: 'https://cloudfront-us-east-1.images.arcpublishing.com/estadao/4FEN3OAGTRGI3A4J5HVX2MA5EA.jpeg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_UBER' },
-                { id: 'pets', titulo: 'Carinho pros pets (pet shop)', preco: 180, imagem: 'https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?q=80&w=1200&auto=format&fit=crop', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_PETS' },
-                { id: 'netflix', titulo: 'Netflix por 1 ano', preco: 250, imagem: 'https://img.youtube.com/vi/ZMak63mHq5Y/sddefault.jpg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_NETFLIX' },
-                { id: 'musica', titulo: 'Assinatura de música (1 ano)', preco: 240, imagem: 'https://cdn.awsli.com.br/2319/2319147/produto/146032214/assinatura-spotify-cegxe6imt9.jpg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_MUSICA' },
-                { id: 'limpeza', titulo: 'Limpeza pós-festa', preco: 500, imagem: 'https://media.istockphoto.com/id/149373772/pt/foto/limpeza-de-trafulhices-p%C3%B3s-festa.jpg?s=612x612&w=0&k=20&c=jEATEbB2siwrHZKUoC4LRGqvj2WTMluaRZrE9Rrl9N0=', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_LIMPEZA' },
-                { id: 'decor-romantica', titulo: 'Decoração romântica em casa', preco: 200, imagem: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHamyj03zSr9FVvo4ZcSb4T6MW754Qco5kOA&s', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_DECOR' },
-                { id: 'trilha', titulo: 'Trilha com guia', preco: 300, imagem: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1200&auto=format&fit=crop', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_TRILHA' },
-                { id: 'hotel-romantico', titulo: 'Noite romântica em hotel', preco: 1200, imagem: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1200&auto=format&fit=crop', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_HOTEL' },
-                { id: 'helicoptero', titulo: 'Passeio de helicóptero', preco: 2500, imagem: 'https://www.maladeaventuras.com/wp-content/uploads/2024/12/passeio-helicoptero-rio-quanto-tempo-dura.jpg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_HELICOPTERO' },
-                { id: 'parcela-lua-mel-1', titulo: 'Parcela da Lua de Mel', preco: 1000, imagem: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_PARCELA1' },
-                { id: 'parcela-lua-mel-2', titulo: 'Parcela da Lua de Mel', preco: 2000, imagem: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_PARCELA2' },
-                { id: 'parcela-lua-mel-3', titulo: 'Parcela da Lua de Mel', preco: 3500, imagem: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_PARCELA3' },
-                { id: 'massagem', titulo: 'Massagem dupla', preco: 300, imagem: 'https://dcdn-us.mitiendanube.com/stores/001/398/332/products/dupla-massagem1-0f0e60612a378639d916161856343845-640-0.jpg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_MASSAGEM' },
-                { id: 'wine-tasting', titulo: 'Degustação de vinhos', preco: 280, imagem: 'https://cdn.api.wine-locals.com/guide/images/medium_Degustacao_Harmonizada_com_Vista_ao_Vinhedo_na_Vinicola_XV_de_Novembro_1_6027c45d8a.webp', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_WINE' },
-                { id: 'brunch-dominical', titulo: 'Brunch dominical', preco: 200, imagem: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbRg-cvIDlQO67UEbEnW-GyAG-NCgRCSsUkg&s', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_BRUNCH' },
-                { id: 'tour-sorvete', titulo: 'Tour do sorvete', preco: 120, imagem: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTW7qcBSbH0DmDt-iHSBj-1ymljC7xCLOgl3cjGqRR621KJDJ3JgPfAjTyCO-SRaYgsXoc&usqp=CAU', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_SORVETE' },
-                { id: 'karaoke-night', titulo: 'Noite de karaokê', preco: 150, imagem: 'https://img.freepik.com/fotos-premium/amigos-felizes-cantando-no-karaoke_107420-27664.jpg?semt=ais_hybrid&w=740&q=80', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_KARAOKE' },
-                { id: 'escape-room', titulo: 'Escape room do casal', preco: 250, imagem: 'https://www.elhombre.com.br/wp-content/uploads/2016/07/escape.jpg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_ESCAPE' },
-                { id: 'bate-volta-praia', titulo: 'Bate-volta na praia', preco: 300, imagem: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_PRAIA' },
-                { id: 'mirante', titulo: 'Visita ao mirante da cidade', preco: 100, imagem: 'https://images.unsplash.com/photo-1470770903676-69b98201ea1c?q=80&w=1200&auto=format&fit=crop', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_MIRANTE' },
-                { id: 'jogo-tabuleiro', titulo: 'Noite de jogos de tabuleiro', preco: 180, imagem: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_JOGOS' },
-                { id: 'delivery-gourmet', titulo: 'Delivery gourmet do casal', preco: 220, imagem: 'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=1200&auto=format&fit=crop', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_DELIVERY' },
-                { id: 'assinatura-cafe', titulo: 'Assinatura de café (3 meses)', preco: 240, imagem: 'https://cafeteiratres.com/wp-content/uploads/2019/05/assinatura-de-cafe-vale-a-pena.jpg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_CAFE_ASSINATURA' },
-                { id: 'taxi-aeroporto', titulo: 'Táxi/transfer aeroporto', preco: 200, imagem: 'https://unityvans.com.br/wp-content/uploads/Transfer-Aeroporto-Taxi-Executivo.jpg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_TRANSFER' },
-                { id: 'parque-diversoes', titulo: 'Dia no parque de diversões', preco: 400, imagem: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuJnoDsLYfNmZ6Xma8aIYeuCJoaMPee4NV6Q&s', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_PARQUE' },
-                { id: 'churrasco-amigos', titulo: 'Churrasco entre amigos', preco: 450, imagem: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTllpw_Z4e2glX4QReCA9ZyIwnE63u75U450w&s', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_CHURRASCO' },
-                { id: 'mini-viagem', titulo: 'Mini viagem a dois', preco: 500, imagem: 'https://palacepraia.com.br/wp-content/uploads/2021/06/viajar-a-dois.jpg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_MINIVIAGEM' },
-                { id: 'aula-cozinha', titulo: 'Aula de cozinha a dois', preco: 350, imagem: 'https://f.i.uol.com.br/fotografia/2025/04/24/1745509665680a5d217abce_1745509665_3x2_md.jpg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_COZINHA' },
-                { id: 'fotolivro', titulo: 'Fotolivro do casamento', preco: 300, imagem: 'https://img.elo7.com.br/product/zoom/243CD39/fotolivro-casamento-21x30-capa-dura-para-80-fotos-foto.jpg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_FOTOLIVRO' },
-                { id: 'flores-mes', titulo: 'Flores por 3 meses', preco: 400, imagem: 'https://casa.abril.com.br/wp-content/uploads/2020/07/florista-dc3a1-dica-de-cuidado-com-flores-e-plantas-em-casa-rosas-casacom-5.jpg?quality=70&strip=info&w=1024', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_FLORES' },
-                { id: 'spa-maos-pes', titulo: 'Spa mãos & pés', preco: 200, imagem: 'https://conceitohoteleiro.blancspa.com.br/wp-content/uploads/2021/01/Spa-dos-Pes-e-Maos.jpg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_SPA_MAOS_PES' },
-                { id: 'aula-surf', titulo: 'Aula de surf a dois', preco: 500, imagem: 'https://images.unsplash.com/photo-1493558103817-58b2924bce98?q=80&w=1200&auto=format&fit=crop', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_SURF' },
-                { id: 'trilha-amanhecer', titulo: 'Trilha ao amanhecer', preco: 250, imagem: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1200&auto=format&fit=crop', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_TRILHA_AMANHECER' },
-                { id: 'piquenique-premium', titulo: 'Piquenique premium', preco: 300, imagem: 'https://i.pinimg.com/originals/80/a0/c3/80a0c303f70f5aa73458766b3c467de9.jpg', pagamento: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_PREF_ID_PIQUENIQUE_PREMIUM' }
+                { id: 'teste-1-real', titulo: 'Teste', preco: 1, imagem: 'https://images.unsplash.com/photo-1520974735194-6d6493f13107?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'ajuda-lua-mel', titulo: 'Ajuda na Lua de Mel', preco: 300, imagem: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'jantar-romantico', titulo: 'Jantar romântico', preco: 350, imagem: 'https://www.receitasja.com.br/wp-content/uploads/2025/06/jantar-romantico-1140x597.jpg' },
+                { id: 'noite-cinema', titulo: 'Noite de cinema em casa', preco: 160, imagem: 'https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'cafe-manha', titulo: 'Café da manhã na cama', preco: 150, imagem: 'https://acquaaroma.venusdigital.com.br/wp-content/uploads/2025/05/cafe-manha-cama.webp' },
+                { id: 'pizza-night', titulo: 'Noite da pizza', preco: 120, imagem: 'https://anamariareceitas.com.br/wp-content/uploads/2023/08/Dicas-para-uma-noite-de-pizza-1.jpg' },
+                { id: 'dia-noivo', titulo: 'Dia do Noivo (barbearia & spa)', preco: 450, imagem: 'https://lapisdenoiva.com/wp-content/uploads/2024/05/barbearia-noivo.jpg' },
+                { id: 'dia-noiva', titulo: 'Dia da Noiva (cabelo & spa)', preco: 1000, imagem: 'https://fisioderme.com.br/wp-content/uploads/2021/10/Bridal-checklist.png' },
+                { id: 'curso-danca', titulo: 'Curso de dança do casal', preco: 250, imagem: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'picnic', titulo: 'Piquenique no parque', preco: 150, imagem: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgPCJxCQ329IZ471nRqo7O2HQCyaiW4UyMEg&s' },
+                { id: 'bike', titulo: 'Passeio de bicicleta', preco: 100, imagem: 'https://cdn-hweb.hsystem.com.br/5fdcc5cdacb69449bcc87151/5fa0837cf5614fbebaa05e02c80d4478.jpg' },
+                { id: 'spa-casal', titulo: 'Spa do casal', preco: 800, imagem: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'passeio-barco', titulo: 'Passeio de barco', preco: 500, imagem: 'https://imagedelivery.net/EafvxYlk8cSUsWEWsetEdQ/ae2daa61-ca39-4d51-598f-ca812433de00/w=1000' },
+                { id: 'sessao-fotos', titulo: 'Sessão de fotos do casal', preco: 800, imagem: 'https://www.temporadaempiri.com.br/media/648e6d604e9634e71e9a83fc/md' },
+                { id: 'gasolina', titulo: 'Gasolina para viagens a dois', preco: 400, imagem: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHJf1yYzI8Pjk_v9GMtIZiz5viWRbVs8zE67O0D2o-_8zhCmV0Pgqfm7VJcZUAAWDHc-w&usqp=CAU' },
+                { id: 'uber', titulo: 'Uber pós-festa', preco: 180, imagem: 'https://cloudfront-us-east-1.images.arcpublishing.com/estadao/4FEN3OAGTRGI3A4J5HVX2MA5EA.jpeg' },
+                { id: 'pets', titulo: 'Carinho pros pets (pet shop)', preco: 190, imagem: 'https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'netflix', titulo: 'Netflix por 1 ano', preco: 250, imagem: 'https://img.youtube.com/vi/ZMak63mHq5Y/sddefault.jpg' },
+                { id: 'musica', titulo: 'Assinatura de música (1 ano)', preco: 240, imagem: 'https://cdn.awsli.com.br/2319/2319147/produto/146032214/assinatura-spotify-cegxe6imt9.jpg' },
+                { id: 'limpeza', titulo: 'Limpeza pós-festa', preco: 500, imagem: 'https://media.istockphoto.com/id/149373772/pt/foto/limpeza-de-trafulhices-p%C3%B3s-festa.jpg?s=612x612&w=0&k=20&c=jEATEbB2siwrHZKUoC4LRGqvj2WTMluaRZrE9Rrl9N0=' },
+                { id: 'decor-romantica', titulo: 'Decoração romântica em casa', preco: 280, imagem: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHamyj03zSr9FVvo4ZcSb4T6MW754Qco5kOA&s' },
+                { id: 'trilha', titulo: 'Trilha com guia', preco: 300, imagem: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'hotel-romantico', titulo: 'Noite romântica em hotel', preco: 1200, imagem: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'helicoptero', titulo: 'Passeio de helicóptero', preco: 2500, imagem: 'https://www.maladeaventuras.com/wp-content/uploads/2024/12/passeio-helicoptero-rio-quanto-tempo-dura.jpg' },
+                { id: 'parcela-lua-mel-1', titulo: 'Parcela da Lua de Mel', preco: 1000, imagem: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'parcela-lua-mel-2', titulo: 'Parcela da Lua de Mel', preco: 2000, imagem: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'parcela-lua-mel-3', titulo: 'Parcela da Lua de Mel', preco: 3500, imagem: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'massagem', titulo: 'Massagem dupla', preco: 400, imagem: 'https://dcdn-us.mitiendanube.com/stores/001/398/332/products/dupla-massagem1-0f0e60612a378639d916161856343845-640-0.jpg' },
+                { id: 'wine-tasting', titulo: 'Degustação de vinhos', preco: 380, imagem: 'https://cdn.api.wine-locals.com/guide/images/medium_Degustacao_Harmonizada_com_Vista_ao_Vinhedo_na_Vinicola_XV_de_Novembro_1_6027c45d8a.webp' },
+                { id: 'brunch-dominical', titulo: 'Brunch dominical', preco: 200, imagem: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbRg-cvIDlQO67UEbEnW-GyAG-NCgRCSsUkg&s' },
+                { id: 'tour-sorvete', titulo: 'Tour do sorvete', preco: 120, imagem: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTW7qcBSbH0DmDt-iHSBj-1ymljC7xCLOgl3cjGqRR621KJDJ3JgPfAjTyCO-SRaYgsXoc&usqp=CAU' },
+                { id: 'karaoke-night', titulo: 'Noite de karaokê', preco: 150, imagem: 'https://img.freepik.com/fotos-premium/amigos-felizes-cantando-no-karaoke_107420-27664.jpg?semt=ais_hybrid&w=740&q=80' },
+                { id: 'escape-room', titulo: 'Escape room do casal', preco: 250, imagem: 'https://www.elhombre.com.br/wp-content/uploads/2016/07/escape.jpg' },
+                { id: 'bate-volta-praia', titulo: 'Bate-volta na praia', preco: 300, imagem: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'mirante', titulo: 'Visita ao mirante da cidade', preco: 100, imagem: 'https://images.unsplash.com/photo-1470770903676-69b98201ea1c?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'jogo-tabuleiro', titulo: 'Noite de jogos de tabuleiro', preco: 195, imagem: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'delivery-gourmet', titulo: 'Delivery gourmet do casal', preco: 250, imagem: 'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'assinatura-cafe', titulo: 'Assinatura de café (3 meses)', preco: 240, imagem: 'https://cafeteiratres.com/wp-content/uploads/2019/05/assinatura-de-cafe-vale-a-pena.jpg' },
+                { id: 'taxi-aeroporto', titulo: 'Táxi/transfer aeroporto', preco: 200, imagem: 'https://unityvans.com.br/wp-content/uploads/Transfer-Aeroporto-Taxi-Executivo.jpg' },
+                { id: 'parque-diversoes', titulo: 'Dia no parque de diversões', preco: 400, imagem: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuJnoDsLYfNmZ6Xma8aIYeuCJoaMPee4NV6Q&s' },
+                { id: 'churrasco-amigos', titulo: 'Churrasco entre amigos', preco: 450, imagem: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTllpw_Z4e2glX4QReCA9ZyIwnE63u75U450w&s' },
+                { id: 'mini-viagem', titulo: 'Mini viagem a dois', preco: 500, imagem: 'https://palacepraia.com.br/wp-content/uploads/2021/06/viajar-a-dois.jpg' },
+                { id: 'aula-cozinha', titulo: 'Aula de cozinha a dois', preco: 350, imagem: 'https://f.i.uol.com.br/fotografia/2025/04/24/1745509665680a5d217abce_1745509665_3x2_md.jpg' },
+                { id: 'fotolivro', titulo: 'Fotolivro do casamento', preco: 300, imagem: 'https://img.elo7.com.br/product/zoom/243CD39/fotolivro-casamento-21x30-capa-dura-para-80-fotos-foto.jpg' },
+                { id: 'flores-mes', titulo: 'Flores por 3 meses', preco: 400, imagem: 'https://casa.abril.com.br/wp-content/uploads/2020/07/florista-dc3a1-dica-de-cuidado-com-flores-e-plantas-em-casa-rosas-casacom-5.jpg?quality=70&strip=info&w=1024' },
+                { id: 'spa-maos-pes', titulo: 'Spa mãos & pés', preco: 200, imagem: 'https://conceitohoteleiro.blancspa.com.br/wp-content/uploads/2021/01/Spa-dos-Pes-e-Maos.jpg' },
+                { id: 'aula-surf', titulo: 'Aula de surf a dois', preco: 500, imagem: 'https://images.unsplash.com/photo-1493558103817-58b2924bce98?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'trilha-amanhecer', titulo: 'Trilha ao amanhecer', preco: 250, imagem: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'piquenique-premium', titulo: 'Piquenique premium', preco: 300, imagem: 'https://i.pinimg.com/originals/80/a0/c3/80a0c303f70f5aa73458766b3c467de9.jpg' }
             ];
+
+            
 
             const grid = document.getElementById('presentes-grid');
             grid.innerHTML = '';
@@ -135,6 +143,15 @@
             let itemAtual = null;
 
             async function startCheckout(item) {
+                if (linkConfig.handle) {
+                    const url = buildIntegratedCheckoutUrl(item);
+                    window.location.href = url;
+                    return;
+                }
+                if (item.pagamento && /^https?:\/\//.test(item.pagamento)) {
+                    window.location.href = item.pagamento;
+                    return;
+                }
                 try {
                     const resp = await fetch('/api/checkout', {
                         method: 'POST',
@@ -183,6 +200,24 @@
                 force_ios_deeplink: true
             };
 
+            const linkConfig = {
+                handle: 'werisder-bertoli',
+                redirectUrl: 'https://werisbertoli.github.io/convite-casamento/presentes.html'
+            };
+
+            function buildIntegratedCheckoutUrl(item) {
+                const cents = Math.max(100, Math.round(item.preco * 100));
+                const items = encodeURIComponent(JSON.stringify([{ name: item.titulo, price: cents, quantity: 1 }]));
+                const redirect = encodeURIComponent(linkConfig.redirectUrl);
+                return `https://checkout.infinitepay.io/${linkConfig.handle}?items=${items}&order_nsu=${encodeURIComponent(item.id)}&redirect_url=${redirect}`;
+            }
+
+            if (linkConfig.handle) {
+                presentes.forEach(item => {
+                    item.pagamento = buildIntegratedCheckoutUrl(item);
+                });
+            }
+
             function buildInfinitePayUrl(valor, metodo, parcelas) {
                 const cents = Math.max(100, Math.round(valor * 100));
                 const params = new URLSearchParams();
@@ -204,15 +239,103 @@
 
             btnPagar.addEventListener('click', function(){
                 if (!itemAtual) return;
-                const metodo = paymentMethodEl.value;
-                if (metodo === 'pix' && itemAtual.pagamento) {
-                    window.open(itemAtual.pagamento, '_blank');
-                    return;
-                }
-                const parcelas = installmentsEl.disabled ? 1 : Number(installmentsEl.value || 1);
-                const url = buildInfinitePayUrl(itemAtual.preco, metodo, parcelas);
+                const url = buildIntegratedCheckoutUrl(itemAtual);
                 window.location.href = url;
             });
+
+            const qs = new URLSearchParams(location.search);
+            const transactionId = qs.get('transaction_id');
+            const orderNsu = qs.get('order_nsu');
+            const slug = qs.get('slug');
+            const receiptUrl = qs.get('receipt_url');
+            if (transactionId && slug && linkConfig.handle && linkConfig.handle !== 'SEU_HANDLE') {
+                const parts = [`transaction_nsu=${encodeURIComponent(transactionId)}`, `slug=${encodeURIComponent(slug)}`];
+                if (orderNsu) parts.push(`external_order_nsu=${encodeURIComponent(orderNsu)}`);
+                const u = `https://api.infinitepay.io/invoices/public/checkout/payment_check/${linkConfig.handle}?${parts.join('&')}`;
+                fetch(u).then(r=>r.json()).then(async d=>{
+                    const existing = document.getElementById('payment-banner');
+                    if (existing) existing.remove();
+                    const bar = document.createElement('div');
+                    bar.id='payment-banner';
+                    bar.style.position='fixed';
+                    bar.style.top='0';
+                    bar.style.left='0';
+                    bar.style.right='0';
+                    bar.style.padding='12px 56px 12px 12px';
+                    bar.style.minHeight='48px';
+                    bar.style.background=d.paid?'#d4edda':'#fff3cd';
+                    bar.style.color='#333';
+                    bar.style.textAlign='center';
+                    bar.style.zIndex='2000';
+                    bar.style.boxShadow='0 2px 12px rgba(0,0,0,0.2)';
+                    bar.style.borderBottom='1px solid rgba(0,0,0,0.1)';
+                    const text = document.createElement('span');
+                    text.textContent = d.paid ? 'Pagamento confirmado. Obrigado!' : 'Pagamento pendente.';
+                    text.style.fontWeight='600';
+                    document.body.appendChild(bar);
+                    bar.appendChild(text);
+                    if (receiptUrl) {
+                        const link = document.createElement('a');
+                        link.href = receiptUrl;
+                        link.target = '_blank';
+                        link.rel = 'noopener noreferrer';
+                        link.textContent = 'Ver comprovante';
+                        link.style.marginLeft = '12px';
+                        link.style.fontWeight = '600';
+                        link.style.textDecoration = 'underline';
+                        link.style.color = d.paid ? '#155724' : '#856404';
+                        bar.appendChild(link);
+                    }
+                    const close = document.createElement('button');
+                    close.textContent = 'Fechar';
+                    close.style.position='absolute';
+                    close.style.right='12px';
+                    close.style.top='8px';
+                    close.style.border='none';
+                    close.style.background='transparent';
+                    close.style.cursor='pointer';
+                    close.style.fontWeight='600';
+                    close.style.color='#333';
+                    close.addEventListener('click', function(){ bar.remove(); });
+                    bar.appendChild(close);
+                    if (d.paid && orderNsu) {
+                        try {
+                            await setDoc(doc(db, 'gifts', orderNsu), { status: 'sold', transaction_nsu: transactionId, slug: slug, updatedAt: new Date().toISOString() }, { merge: true });
+                            const btn = document.querySelector(`.btn-comprar[data-id="${orderNsu}"]`);
+                            if (btn) {
+                                btn.textContent = 'Indisponível';
+                                btn.disabled = true;
+                                const card = btn.closest('.gift-card');
+                                if (card) { card.style.opacity = '0.6'; }
+                            }
+                        } catch (e) {}
+                    }
+                }).catch(()=>{});
+            }
+
+            async function loadSoldIds() {
+                try {
+                    const snap = await getDocs(collection(db, 'gifts'));
+                    const set = new Set();
+                    snap.forEach(d => { const v = d.data(); if (v && v.status === 'sold') set.add(d.id); });
+                    return set;
+                } catch (e) { return new Set(); }
+            }
+
+            const sold = await loadSoldIds();
+            if (sold.size > 0) {
+                presentes.forEach(item => {
+                    if (sold.has(item.id)) {
+                        const btn = document.querySelector(`.btn-comprar[data-id="${item.id}"]`);
+                        if (btn) {
+                            btn.textContent = 'Indisponível';
+                            btn.disabled = true;
+                            const card = btn.closest('.gift-card');
+                            if (card) { card.style.opacity = '0.6'; }
+                        }
+                    }
+                });
+            }
         });
     </script>
 </body>
