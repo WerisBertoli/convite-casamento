@@ -18,44 +18,7 @@
         <div class="presentes-grid" id="presentes-grid"></div>
     </div>
 
-    <div id="modal-presente" class="modal-presente">
-        <div class="modal-backdrop">
-            <div class="modal-content">
-                <button id="btn-fechar-presente" class="btn-fechar">
-                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                    </svg>
-                    <span class="sr-only">Fechar modal</span>
-                </button>
-                <div class="detalhe">
-                    <img id="detalhe-img" class="detalhe-img" alt="Presente">
-                    <div>
-                        <h3 id="detalhe-titulo" class="detalhe-titulo"></h3>
-                        <p id="detalhe-preco" class="detalhe-preco"></p>
-                        <div class="detalhe-actions">
-                            <input id="customer-name" class="btn-comprar" placeholder="Nome" style="padding:0.5rem 0.75rem" />
-                            <input id="customer-email" class="btn-comprar" placeholder="Email" style="padding:0.5rem 0.75rem" />
-                            <input id="customer-phone" class="btn-comprar" placeholder="Celular" style="padding:0.5rem 0.75rem" />
-                            <select id="payment-method" class="btn-comprar" style="padding:0.5rem 0.75rem">
-                                <option value="credit">Cartão crédito</option>
-                                <option value="debit">Cartão débito</option>
-                                <option value="pix">Pix</option>
-                            </select>
-                            <select id="installments" class="btn-comprar" style="padding:0.5rem 0.75rem">
-                                <option value="1">1x</option>
-                            </select>
-                            <button id="btn-pagar" class="btn-comprar">Pagar</button>
-                            <img class="badge" src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa">
-                            <img class="badge" src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg" alt="Mastercard">
-                            <img class="badge" src="https://upload.wikimedia.org/wikipedia/commons/8/89/Barcode_font_logo.svg" alt="Boleto">
-                        </div>
-                        <div style="margin-top:8px;color:#666">Parcelamento disponível</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getFirestore, collection, getDocs, setDoc, doc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
@@ -176,6 +139,7 @@
             grid.addEventListener('click', function(e){
                 const botao = e.target.closest('.btn-comprar');
                 if (!botao) return;
+                if (botao.disabled) return;
                 const id = botao.getAttribute('data-id');
                 const item = presentes.find(p => p.id === id);
                 if (!item) return;
@@ -183,17 +147,21 @@
                 startCheckout(item);
             });
 
-            btnFechar.addEventListener('click', function(){
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            });
-
-            modal.addEventListener('click', function(e){
-                if (e.target === modal) {
-                    modal.style.display = 'none';
+            if (btnFechar) {
+                btnFechar.addEventListener('click', function(){
+                    if (modal) { modal.style.display = 'none'; }
                     document.body.style.overflow = 'auto';
-                }
-            });
+                });
+            }
+
+            if (modal) {
+                modal.addEventListener('click', function(e){
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+            }
 
             const infinitePayConfig = {
                 handle: 'SEU_HANDLE',
@@ -241,89 +209,144 @@
                 return `infinitepaydash://infinitetap-app?${params.toString()}`;
             }
 
-            paymentMethodEl.addEventListener('change', function(){
-                installmentsEl.disabled = this.value !== 'credit';
-            });
+            if (paymentMethodEl && installmentsEl) {
+                paymentMethodEl.addEventListener('change', function(){
+                    installmentsEl.disabled = this.value !== 'credit';
+                });
+            }
 
-            btnPagar.addEventListener('click', function(){
-                if (!itemAtual) return;
-                const name = document.getElementById('customer-name').value.trim();
-                const email = document.getElementById('customer-email').value.trim();
-                const phone = document.getElementById('customer-phone').value.trim();
-                const url = buildIntegratedCheckoutUrl(itemAtual, { name, email, phone });
-                window.location.href = url;
-            });
+            if (btnPagar) {
+                btnPagar.addEventListener('click', function(){
+                    if (!itemAtual) return;
+                    const name = (document.getElementById('customer-name')?.value || '').trim();
+                    const email = (document.getElementById('customer-email')?.value || '').trim();
+                    const phone = (document.getElementById('customer-phone')?.value || '').trim();
+                    const url = buildIntegratedCheckoutUrl(itemAtual, { name, email, phone });
+                    window.location.href = url;
+                });
+            }
 
             const qs = new URLSearchParams(location.search);
             const transactionId = qs.get('transaction_id');
             const orderNsu = qs.get('order_nsu');
             const slug = qs.get('slug');
             const receiptUrl = qs.get('receipt_url');
-            if (transactionId && slug && linkConfig.handle && linkConfig.handle !== 'SEU_HANDLE') {
-                const parts = [`transaction_nsu=${encodeURIComponent(transactionId)}`, `slug=${encodeURIComponent(slug)}`];
-                if (orderNsu) parts.push(`external_order_nsu=${encodeURIComponent(orderNsu)}`);
-                const u = `https://api.infinitepay.io/invoices/public/checkout/payment_check/${linkConfig.handle}?${parts.join('&')}`;
-                fetch(u).then(r=>r.json()).then(async d=>{
-                    const existing = document.getElementById('payment-banner');
-                    if (existing) existing.remove();
-                    const bar = document.createElement('div');
-                    bar.id='payment-banner';
-                    bar.style.position='fixed';
-                    bar.style.top='0';
-                    bar.style.left='0';
-                    bar.style.right='0';
-                    bar.style.padding='12px 56px 12px 12px';
-                    bar.style.minHeight='48px';
-                    bar.style.background=d.paid?'#d4edda':'#fff3cd';
-                    bar.style.color='#333';
-                    bar.style.textAlign='center';
-                    bar.style.zIndex='2000';
-                    bar.style.boxShadow='0 2px 12px rgba(0,0,0,0.2)';
-                    bar.style.borderBottom='1px solid rgba(0,0,0,0.1)';
-                    const text = document.createElement('span');
-                    text.textContent = d.paid ? 'Pagamento confirmado. Obrigado!' : 'Pagamento pendente.';
-                    text.style.fontWeight='600';
-                    document.body.appendChild(bar);
-                    bar.appendChild(text);
-                    if (receiptUrl) {
-                        const link = document.createElement('a');
-                        link.href = receiptUrl;
-                        link.target = '_blank';
-                        link.rel = 'noopener noreferrer';
-                        link.textContent = 'Ver comprovante';
-                        link.style.marginLeft = '12px';
-                        link.style.fontWeight = '600';
-                        link.style.textDecoration = 'underline';
-                        link.style.color = d.paid ? '#155724' : '#856404';
-                        bar.appendChild(link);
+            const captureMethod = qs.get('capture_method');
+
+            function renderPaymentOverlay(info) {
+                const existing = document.getElementById('payment-overlay');
+                if (existing) existing.remove();
+                const overlay = document.createElement('div');
+                overlay.id='payment-overlay';
+                overlay.style.position='fixed';
+                overlay.style.top='0';
+                overlay.style.left='0';
+                overlay.style.right='0';
+                overlay.style.bottom='0';
+                overlay.style.background='rgba(0,0,0,0.5)';
+                overlay.style.zIndex='3000';
+                overlay.style.display='flex';
+                overlay.style.alignItems='center';
+                overlay.style.justifyContent='center';
+                const panel = document.createElement('div');
+                panel.style.width='90%';
+                panel.style.maxWidth='520px';
+                panel.style.background=info.paid?'#ffffff':'#fff3cd';
+                panel.style.borderRadius='10px';
+                panel.style.boxShadow='0 4px 20px rgba(0,0,0,0.25)';
+                panel.style.padding='16px';
+                const title = document.createElement('div');
+                title.textContent = info.paid ? 'Pagamento confirmado' : 'Pagamento pendente';
+                title.style.fontSize='18px';
+                title.style.fontWeight='700';
+                title.style.marginBottom='8px';
+                const infoBox = document.createElement('div');
+                const itemName = info.orderNsu ? (presentes.find(p=>p.id===info.orderNsu)?.titulo || info.orderNsu) : '';
+                infoBox.innerHTML = `${itemName ? '<div>Presente: '+itemName+'</div>' : ''}` +
+                                    `${info.transactionId ? '<div>Transação: '+info.transactionId+'</div>' : ''}` +
+                                    `${info.slug ? '<div>Cobrança: '+info.slug+'</div>' : ''}` +
+                                    `${info.captureMethod ? '<div>Método: '+info.captureMethod+'</div>' : ''}`;
+                infoBox.style.color='#333';
+                infoBox.style.marginBottom='8px';
+                const actions = document.createElement('div');
+                actions.style.display='flex';
+                actions.style.gap='12px';
+                actions.style.alignItems='center';
+                if (info.receiptUrl) {
+                    const link = document.createElement('a');
+                    link.href = info.receiptUrl;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    link.textContent = 'Ver comprovante';
+                    link.style.fontWeight = '600';
+                    link.style.textDecoration = 'underline';
+                    actions.appendChild(link);
+                }
+                const close = document.createElement('button');
+                close.textContent = 'Fechar';
+                close.style.border='none';
+                close.style.background='#efefef';
+                close.style.padding='8px 12px';
+                close.style.borderRadius='6px';
+                close.style.cursor='pointer';
+                close.style.fontWeight='600';
+                close.addEventListener('click', function(){
+                    document.body.style.overflow='auto';
+                    sessionStorage.removeItem('paymentOverlay');
+                    location.href = linkConfig.redirectUrl;
+                });
+                actions.appendChild(close);
+                panel.appendChild(title);
+                panel.appendChild(infoBox);
+                panel.appendChild(actions);
+                overlay.appendChild(panel);
+                document.body.appendChild(overlay);
+                document.body.style.overflow='hidden';
+                if (info.paid && info.orderNsu) {
+                    const btn = document.querySelector(`.btn-comprar[data-id="${info.orderNsu}"]`);
+                    if (btn) {
+                        btn.textContent = 'Comprado';
+                        btn.disabled = true;
+                        btn.setAttribute('aria-disabled','true');
+                        btn.style.pointerEvents = 'none';
+                        const card = btn.closest('.gift-card');
+                        if (card) { card.style.opacity = '0.6'; }
                     }
-                    const close = document.createElement('button');
-                    close.textContent = 'Fechar';
-                    close.style.position='absolute';
-                    close.style.right='12px';
-                    close.style.top='8px';
-                    close.style.border='none';
-                    close.style.background='transparent';
-                    close.style.cursor='pointer';
-                    close.style.fontWeight='600';
-                    close.style.color='#333';
-                    close.addEventListener('click', function(){ bar.remove(); });
-                    bar.appendChild(close);
-                    if (d.paid) {
-                        if (orderNsu) {
-                            const btn = document.querySelector(`.btn-comprar[data-id="${orderNsu}"]`);
-                            if (btn) {
-                                btn.textContent = 'Indisponível';
-                                btn.disabled = true;
-                                const card = btn.closest('.gift-card');
-                                if (card) { card.style.opacity = '0.6'; }
-                            }
+                }
+            }
+
+            const storedOverlay = sessionStorage.getItem('paymentOverlay');
+            if (storedOverlay) {
+                try {
+                    const parsed = JSON.parse(storedOverlay);
+                    renderPaymentOverlay(parsed);
+                } catch (e) {}
+            }
+
+            const hasParams = !!(transactionId || orderNsu || slug || receiptUrl || captureMethod);
+            if (hasParams) {
+                const baseInfo = { paid: false, transactionId, orderNsu, slug, receiptUrl, captureMethod };
+                sessionStorage.setItem('paymentOverlay', JSON.stringify(baseInfo));
+                renderPaymentOverlay(baseInfo);
+                if (transactionId && slug && linkConfig.handle && linkConfig.handle !== 'SEU_HANDLE') {
+                    const parts = [`transaction_nsu=${encodeURIComponent(transactionId)}`, `slug=${encodeURIComponent(slug)}`];
+                    if (orderNsu) parts.push(`external_order_nsu=${encodeURIComponent(orderNsu)}`);
+                    const u = `https://api.infinitepay.io/invoices/public/checkout/payment_check/${linkConfig.handle}?${parts.join('&')}`;
+                    fetch(u).then(r=>r.json()).then(async d=>{
+                        const info = { paid: !!d.paid, transactionId, orderNsu, slug, receiptUrl, captureMethod };
+                        sessionStorage.setItem('paymentOverlay', JSON.stringify(info));
+                        renderPaymentOverlay(info);
+                        if (d.paid && orderNsu) {
                             try {
-                                await setDoc(doc(db, 'gifts', orderNsu), { status: 'sold', transaction_nsu: transactionId, slug: slug, updatedAt: new Date().toISOString() }, { merge: true });
+                                await setDoc(doc(db, 'gifts', orderNsu), { status: 'sold', transaction_nsu: transactionId, slug: slug, capture_method: captureMethod, updatedAt: new Date().toISOString() }, { merge: true });
                             } catch (e) {}
                         }
-                    }
-                }).catch(()=>{});
+                    }).catch(()=>{
+                        const info = { paid: false, transactionId, orderNsu, slug, receiptUrl, captureMethod };
+                        sessionStorage.setItem('paymentOverlay', JSON.stringify(info));
+                        renderPaymentOverlay(info);
+                    });
+                }
             }
 
             async function loadSoldIds() {
@@ -341,8 +364,10 @@
                     if (sold.has(item.id)) {
                         const btn = document.querySelector(`.btn-comprar[data-id="${item.id}"]`);
                         if (btn) {
-                            btn.textContent = 'Indisponível';
+                            btn.textContent = 'Comprado';
                             btn.disabled = true;
+                            btn.setAttribute('aria-disabled','true');
+                            btn.style.pointerEvents = 'none';
                             const card = btn.closest('.gift-card');
                             if (card) { card.style.opacity = '0.6'; }
                         }
