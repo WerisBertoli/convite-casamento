@@ -33,6 +33,9 @@
                         <h3 id="detalhe-titulo" class="detalhe-titulo"></h3>
                         <p id="detalhe-preco" class="detalhe-preco"></p>
                         <div class="detalhe-actions">
+                            <input id="customer-name" class="btn-comprar" placeholder="Nome" style="padding:0.5rem 0.75rem" />
+                            <input id="customer-email" class="btn-comprar" placeholder="Email" style="padding:0.5rem 0.75rem" />
+                            <input id="customer-phone" class="btn-comprar" placeholder="Celular" style="padding:0.5rem 0.75rem" />
                             <select id="payment-method" class="btn-comprar" style="padding:0.5rem 0.75rem">
                                 <option value="credit">Cartão crédito</option>
                                 <option value="debit">Cartão débito</option>
@@ -205,11 +208,16 @@
                 redirectUrl: 'https://werisbertoli.github.io/convite-casamento/presentes.html'
             };
 
-            function buildIntegratedCheckoutUrl(item) {
+            function buildIntegratedCheckoutUrl(item, extras) {
                 const cents = Math.max(100, Math.round(item.preco * 100));
                 const items = encodeURIComponent(JSON.stringify([{ name: item.titulo, price: cents, quantity: 1 }]));
                 const redirect = encodeURIComponent(linkConfig.redirectUrl);
-                return `https://checkout.infinitepay.io/${linkConfig.handle}?items=${items}&order_nsu=${encodeURIComponent(item.id)}&redirect_url=${redirect}`;
+                const base = `https://checkout.infinitepay.io/${linkConfig.handle}?items=${items}&order_nsu=${encodeURIComponent(item.id)}&redirect_url=${redirect}`;
+                const extra = [];
+                if (extras && extras.name) extra.push(`customer_name=${encodeURIComponent(extras.name)}`);
+                if (extras && extras.email) extra.push(`customer_email=${encodeURIComponent(extras.email)}`);
+                if (extras && extras.phone) extra.push(`customer_cellphone=${encodeURIComponent(extras.phone)}`);
+                return extra.length ? `${base}&${extra.join('&')}` : base;
             }
 
             if (linkConfig.handle) {
@@ -239,7 +247,10 @@
 
             btnPagar.addEventListener('click', function(){
                 if (!itemAtual) return;
-                const url = buildIntegratedCheckoutUrl(itemAtual);
+                const name = document.getElementById('customer-name').value.trim();
+                const email = document.getElementById('customer-email').value.trim();
+                const phone = document.getElementById('customer-phone').value.trim();
+                const url = buildIntegratedCheckoutUrl(itemAtual, { name, email, phone });
                 window.location.href = url;
             });
 
@@ -298,9 +309,8 @@
                     close.style.color='#333';
                     close.addEventListener('click', function(){ bar.remove(); });
                     bar.appendChild(close);
-                    if (d.paid && orderNsu) {
-                        try {
-                            await setDoc(doc(db, 'gifts', orderNsu), { status: 'sold', transaction_nsu: transactionId, slug: slug, updatedAt: new Date().toISOString() }, { merge: true });
+                    if (d.paid) {
+                        if (orderNsu) {
                             const btn = document.querySelector(`.btn-comprar[data-id="${orderNsu}"]`);
                             if (btn) {
                                 btn.textContent = 'Indisponível';
@@ -308,7 +318,10 @@
                                 const card = btn.closest('.gift-card');
                                 if (card) { card.style.opacity = '0.6'; }
                             }
-                        } catch (e) {}
+                            try {
+                                await setDoc(doc(db, 'gifts', orderNsu), { status: 'sold', transaction_nsu: transactionId, slug: slug, updatedAt: new Date().toISOString() }, { merge: true });
+                            } catch (e) {}
+                        }
                     }
                 }).catch(()=>{});
             }
