@@ -162,13 +162,25 @@
                 }
             }
 
+            function unmarkSold(id) {
+                const btn = document.querySelector(`.btn-comprar[data-id="${id}"]`);
+                if (btn) {
+                    btn.textContent = 'Comprar';
+                    btn.disabled = false;
+                    btn.removeAttribute('aria-disabled');
+                    btn.classList.remove('btn-comprado');
+                    btn.style.pointerEvents = 'auto';
+                    const card = btn.closest('.gift-card');
+                    if (card) { card.style.opacity = '1'; }
+                }
+            }
+
             
 
             const storedReturn = localStorage.getItem('paymentReturn');
             if (storedReturn) {
                 try {
                     const info = JSON.parse(storedReturn);
-                    if (info && info.orderNsu) markSold(info.orderNsu);
                     if (!info.verified && info.transactionId && info.slug && linkConfig.handle && linkConfig.handle !== 'SEU_HANDLE') {
                         const parts = [`transaction_nsu=${encodeURIComponent(info.transactionId)}`, `slug=${encodeURIComponent(info.slug)}`];
                         if (info.orderNsu) parts.push(`external_order_nsu=${encodeURIComponent(info.orderNsu)}`);
@@ -193,7 +205,6 @@
                 if (ev.key === 'paymentReturn' && ev.newValue) {
                     try {
                         const info = JSON.parse(ev.newValue);
-                        if (info && info.orderNsu) markSold(info.orderNsu);
                         if (info.transactionId && info.slug && linkConfig.handle && linkConfig.handle !== 'SEU_HANDLE') {
                             const parts = [`transaction_nsu=${encodeURIComponent(info.transactionId)}`, `slug=${encodeURIComponent(info.slug)}`];
                             if (info.orderNsu) parts.push(`external_order_nsu=${encodeURIComponent(info.orderNsu)}`);
@@ -255,7 +266,9 @@
                 snap.docChanges().forEach(change => {
                     if (change.type === 'added' || change.type === 'modified') {
                         const v = change.doc.data();
-                        if (v && v.status === 'sold') { markSold(change.doc.id); }
+                        if (v && v.status === 'sold') { markSold(change.doc.id); } else { unmarkSold(change.doc.id); }
+                    } else if (change.type === 'removed') {
+                        unmarkSold(change.doc.id);
                     }
                 });
             });
