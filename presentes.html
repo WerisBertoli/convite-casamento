@@ -98,42 +98,11 @@
                 grid.appendChild(card);
             });
 
-            const modal = document.getElementById('modal-presente');
-            const btnFechar = document.getElementById('btn-fechar-presente');
-            const detalheImg = document.getElementById('detalhe-img');
-            const detalheTitulo = document.getElementById('detalhe-titulo');
-            const detalhePreco = document.getElementById('detalhe-preco');
-            const btnPagar = document.getElementById('btn-pagar');
-            const paymentMethodEl = document.getElementById('payment-method');
-            const installmentsEl = document.getElementById('installments');
             let itemAtual = null;
 
             async function startCheckout(item) {
-                if (linkConfig.handle) {
-                    const url = buildIntegratedCheckoutUrl(item);
-                    window.location.href = url;
-                    return;
-                }
-                if (item.pagamento && /^https?:\/\//.test(item.pagamento)) {
-                    window.location.href = item.pagamento;
-                    return;
-                }
-                try {
-                    const resp = await fetch('/api/checkout', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            title: item.titulo,
-                            amount: item.preco,
-                            payment_method: 'credit',
-                            installments: 1
-                        })
-                    });
-                    const data = await resp.json();
-                    if (data.checkout_url) {
-                        window.location.href = data.checkout_url;
-                    }
-                } catch (err) {}
+                const url = buildIntegratedCheckoutUrl(item);
+                window.location.href = url;
             }
 
             grid.addEventListener('click', function(e){
@@ -147,29 +116,6 @@
                 startCheckout(item);
             });
 
-            if (btnFechar) {
-                btnFechar.addEventListener('click', function(){
-                    if (modal) { modal.style.display = 'none'; }
-                    document.body.style.overflow = 'auto';
-                });
-            }
-
-            if (modal) {
-                modal.addEventListener('click', function(e){
-                    if (e.target === modal) {
-                        modal.style.display = 'none';
-                        document.body.style.overflow = 'auto';
-                    }
-                });
-            }
-
-            const infinitePayConfig = {
-                handle: 'SEU_HANDLE',
-                doc_number: 'SEU_CNPJ_SEM_PONTOS',
-                result_url: 'seuapp://tap_result',
-                app_client_referrer: 'CasamentoWeb',
-                force_ios_deeplink: true
-            };
 
             const linkConfig = {
                 handle: 'werisder-bertoli',
@@ -194,37 +140,7 @@
                 });
             }
 
-            function buildInfinitePayUrl(valor, metodo, parcelas) {
-                const cents = Math.max(100, Math.round(valor * 100));
-                const params = new URLSearchParams();
-                params.set('amount', String(cents));
-                params.set('payment_method', metodo);
-                if (metodo === 'credit') params.set('installments', String(parcelas));
-                params.set('order_id', String(Date.now()));
-                params.set('result_url', encodeURIComponent(infinitePayConfig.result_url));
-                params.set('app_client_referrer', infinitePayConfig.app_client_referrer);
-                if (infinitePayConfig.handle) params.set('handle', infinitePayConfig.handle);
-                if (infinitePayConfig.doc_number) params.set('doc_number', infinitePayConfig.doc_number);
-                if (infinitePayConfig.force_ios_deeplink) params.set('af_force_deeplink', 'true');
-                return `infinitepaydash://infinitetap-app?${params.toString()}`;
-            }
-
-            if (paymentMethodEl && installmentsEl) {
-                paymentMethodEl.addEventListener('change', function(){
-                    installmentsEl.disabled = this.value !== 'credit';
-                });
-            }
-
-            if (btnPagar) {
-                btnPagar.addEventListener('click', function(){
-                    if (!itemAtual) return;
-                    const name = (document.getElementById('customer-name')?.value || '').trim();
-                    const email = (document.getElementById('customer-email')?.value || '').trim();
-                    const phone = (document.getElementById('customer-phone')?.value || '').trim();
-                    const url = buildIntegratedCheckoutUrl(itemAtual, { name, email, phone });
-                    window.location.href = url;
-                });
-            }
+            
 
             const qs = new URLSearchParams(location.search);
             const transactionId = qs.get('transaction_id');
@@ -233,119 +149,51 @@
             const receiptUrl = qs.get('receipt_url');
             const captureMethod = qs.get('capture_method');
 
-            function renderPaymentOverlay(info) {
-                const existing = document.getElementById('payment-overlay');
-                if (existing) existing.remove();
-                const overlay = document.createElement('div');
-                overlay.id='payment-overlay';
-                overlay.style.position='fixed';
-                overlay.style.top='0';
-                overlay.style.left='0';
-                overlay.style.right='0';
-                overlay.style.bottom='0';
-                overlay.style.background='rgba(0,0,0,0.5)';
-                overlay.style.zIndex='3000';
-                overlay.style.display='flex';
-                overlay.style.alignItems='center';
-                overlay.style.justifyContent='center';
-                const panel = document.createElement('div');
-                panel.style.width='90%';
-                panel.style.maxWidth='520px';
-                panel.style.background=info.paid?'#ffffff':'#fff3cd';
-                panel.style.borderRadius='10px';
-                panel.style.boxShadow='0 4px 20px rgba(0,0,0,0.25)';
-                panel.style.padding='16px';
-                const title = document.createElement('div');
-                title.textContent = info.paid ? 'Pagamento confirmado' : 'Pagamento pendente';
-                title.style.fontSize='18px';
-                title.style.fontWeight='700';
-                title.style.marginBottom='8px';
-                const infoBox = document.createElement('div');
-                const itemName = info.orderNsu ? (presentes.find(p=>p.id===info.orderNsu)?.titulo || info.orderNsu) : '';
-                infoBox.innerHTML = `${itemName ? '<div>Presente: '+itemName+'</div>' : ''}` +
-                                    `${info.transactionId ? '<div>Transação: '+info.transactionId+'</div>' : ''}` +
-                                    `${info.slug ? '<div>Cobrança: '+info.slug+'</div>' : ''}` +
-                                    `${info.captureMethod ? '<div>Método: '+info.captureMethod+'</div>' : ''}`;
-                infoBox.style.color='#333';
-                infoBox.style.marginBottom='8px';
-                const actions = document.createElement('div');
-                actions.style.display='flex';
-                actions.style.gap='12px';
-                actions.style.alignItems='center';
-                if (info.receiptUrl) {
-                    const link = document.createElement('a');
-                    link.href = info.receiptUrl;
-                    link.target = '_blank';
-                    link.rel = 'noopener noreferrer';
-                    link.textContent = 'Ver comprovante';
-                    link.style.fontWeight = '600';
-                    link.style.textDecoration = 'underline';
-                    actions.appendChild(link);
-                }
-                const close = document.createElement('button');
-                close.textContent = 'Fechar';
-                close.style.border='none';
-                close.style.background='#efefef';
-                close.style.padding='8px 12px';
-                close.style.borderRadius='6px';
-                close.style.cursor='pointer';
-                close.style.fontWeight='600';
-                close.addEventListener('click', function(){
-                    document.body.style.overflow='auto';
-                    sessionStorage.removeItem('paymentOverlay');
-                    location.href = linkConfig.redirectUrl;
-                });
-                actions.appendChild(close);
-                panel.appendChild(title);
-                panel.appendChild(infoBox);
-                panel.appendChild(actions);
-                overlay.appendChild(panel);
-                document.body.appendChild(overlay);
-                document.body.style.overflow='hidden';
-                if (info.paid && info.orderNsu) {
-                    const btn = document.querySelector(`.btn-comprar[data-id="${info.orderNsu}"]`);
-                    if (btn) {
-                        btn.textContent = 'Comprado';
-                        btn.disabled = true;
-                        btn.setAttribute('aria-disabled','true');
-                        btn.style.pointerEvents = 'none';
-                        const card = btn.closest('.gift-card');
-                        if (card) { card.style.opacity = '0.6'; }
-                    }
+            function markSold(id) {
+                const btn = document.querySelector(`.btn-comprar[data-id="${id}"]`);
+                if (btn) {
+                    btn.textContent = 'Comprado';
+                    btn.disabled = true;
+                    btn.setAttribute('aria-disabled','true');
+                    btn.style.pointerEvents = 'none';
+                    const card = btn.closest('.gift-card');
+                    if (card) { card.style.opacity = '0.6'; }
                 }
             }
 
-            const storedOverlay = sessionStorage.getItem('paymentOverlay');
-            if (storedOverlay) {
+            
+
+            const storedReturn = sessionStorage.getItem('paymentReturn');
+            if (storedReturn) {
                 try {
-                    const parsed = JSON.parse(storedOverlay);
-                    renderPaymentOverlay(parsed);
+                    const info = JSON.parse(storedReturn);
+                    if (info && info.orderNsu) markSold(info.orderNsu);
+                    if (!info.verified && info.transactionId && info.slug && linkConfig.handle && linkConfig.handle !== 'SEU_HANDLE') {
+                        const parts = [`transaction_nsu=${encodeURIComponent(info.transactionId)}`, `slug=${encodeURIComponent(info.slug)}`];
+                        if (info.orderNsu) parts.push(`external_order_nsu=${encodeURIComponent(info.orderNsu)}`);
+                        const u = `https://api.infinitepay.io/invoices/public/checkout/payment_check/${linkConfig.handle}?${parts.join('&')}`;
+                        fetch(u).then(r=>r.json()).then(async d=>{
+                            if (d.paid && info.orderNsu) {
+                                try { await setDoc(doc(db, 'gifts', info.orderNsu), { status: 'sold', transaction_nsu: info.transactionId, slug: info.slug, capture_method: info.captureMethod || captureMethod || '', updatedAt: new Date().toISOString() }, { merge: true }); } catch (e) {}
+                                markSold(info.orderNsu);
+                                sessionStorage.removeItem('paymentReturn');
+                                return;
+                            }
+                            info.verified = true;
+                            sessionStorage.setItem('paymentReturn', JSON.stringify(info));
+                        }).catch(()=>{});
+                    } else if (info && info.verified) {
+                        
+                    }
                 } catch (e) {}
             }
 
             const hasParams = !!(transactionId || orderNsu || slug || receiptUrl || captureMethod);
             if (hasParams) {
-                const baseInfo = { paid: false, transactionId, orderNsu, slug, receiptUrl, captureMethod };
-                sessionStorage.setItem('paymentOverlay', JSON.stringify(baseInfo));
-                renderPaymentOverlay(baseInfo);
-                if (transactionId && slug && linkConfig.handle && linkConfig.handle !== 'SEU_HANDLE') {
-                    const parts = [`transaction_nsu=${encodeURIComponent(transactionId)}`, `slug=${encodeURIComponent(slug)}`];
-                    if (orderNsu) parts.push(`external_order_nsu=${encodeURIComponent(orderNsu)}`);
-                    const u = `https://api.infinitepay.io/invoices/public/checkout/payment_check/${linkConfig.handle}?${parts.join('&')}`;
-                    fetch(u).then(r=>r.json()).then(async d=>{
-                        const info = { paid: !!d.paid, transactionId, orderNsu, slug, receiptUrl, captureMethod };
-                        sessionStorage.setItem('paymentOverlay', JSON.stringify(info));
-                        renderPaymentOverlay(info);
-                        if (d.paid && orderNsu) {
-                            try {
-                                await setDoc(doc(db, 'gifts', orderNsu), { status: 'sold', transaction_nsu: transactionId, slug: slug, capture_method: captureMethod, updatedAt: new Date().toISOString() }, { merge: true });
-                            } catch (e) {}
-                        }
-                    }).catch(()=>{
-                        const info = { paid: false, transactionId, orderNsu, slug, receiptUrl, captureMethod };
-                        sessionStorage.setItem('paymentOverlay', JSON.stringify(info));
-                        renderPaymentOverlay(info);
-                    });
+                const info = { transactionId, orderNsu, slug, receiptUrl, captureMethod, verified: false };
+                sessionStorage.setItem('paymentReturn', JSON.stringify(info));
+                if (receiptUrl) {
+                    window.location.replace(receiptUrl);
                 }
             }
 
