@@ -21,7 +21,7 @@
     
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getFirestore, collection, getDocs, setDoc, doc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, getDocs, setDoc, doc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         const firebaseConfig = { apiKey: "AIzaSyDW-QYTaP3YKyTT6xoufmSqmurCXlnuZDU", authDomain: "tripfy-9f09b.firebaseapp.com", projectId: "tripfy-9f09b", storageBucket: "tripfy-9f09b.firebasestorage.app", messagingSenderId: "789407223851", appId: "1:789407223851:web:7bfb1996e8a62c4e7dda6e", measurementId: "G-3RX0B0B1SV" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -102,7 +102,7 @@
 
             async function startCheckout(item) {
                 const url = buildIntegratedCheckoutUrl(item);
-                window.location.href = url;
+                window.open(url, '_blank', 'noopener,noreferrer');
             }
 
             grid.addEventListener('click', function(e){
@@ -155,6 +155,7 @@
                     btn.textContent = 'Comprado';
                     btn.disabled = true;
                     btn.setAttribute('aria-disabled','true');
+                    btn.classList.add('btn-comprado');
                     btn.style.pointerEvents = 'none';
                     const card = btn.closest('.gift-card');
                     if (card) { card.style.opacity = '0.6'; }
@@ -163,7 +164,7 @@
 
             
 
-            const storedReturn = sessionStorage.getItem('paymentReturn');
+            const storedReturn = localStorage.getItem('paymentReturn');
             if (storedReturn) {
                 try {
                     const info = JSON.parse(storedReturn);
@@ -176,11 +177,11 @@
                             if (d.paid && info.orderNsu) {
                                 try { await setDoc(doc(db, 'gifts', info.orderNsu), { status: 'sold', transaction_nsu: info.transactionId, slug: info.slug, capture_method: info.captureMethod || captureMethod || '', updatedAt: new Date().toISOString() }, { merge: true }); } catch (e) {}
                                 markSold(info.orderNsu);
-                                sessionStorage.removeItem('paymentReturn');
+                                localStorage.removeItem('paymentReturn');
                                 return;
                             }
                             info.verified = true;
-                            sessionStorage.setItem('paymentReturn', JSON.stringify(info));
+                            localStorage.setItem('paymentReturn', JSON.stringify(info));
                         }).catch(()=>{});
                     } else if (info && info.verified) {
                         
@@ -188,10 +189,36 @@
                 } catch (e) {}
             }
 
+            window.addEventListener('storage', function(ev){
+                if (ev.key === 'paymentReturn' && ev.newValue) {
+                    try {
+                        const info = JSON.parse(ev.newValue);
+                        if (info && info.orderNsu) markSold(info.orderNsu);
+                        if (info.transactionId && info.slug && linkConfig.handle && linkConfig.handle !== 'SEU_HANDLE') {
+                            const parts = [`transaction_nsu=${encodeURIComponent(info.transactionId)}`, `slug=${encodeURIComponent(info.slug)}`];
+                            if (info.orderNsu) parts.push(`external_order_nsu=${encodeURIComponent(info.orderNsu)}`);
+                            const u = `https://api.infinitepay.io/invoices/public/checkout/payment_check/${linkConfig.handle}?${parts.join('&')}`;
+                            fetch(u).then(r=>r.json()).then(async d=>{
+                                if (d.paid && info.orderNsu) {
+                                    try { await setDoc(doc(db, 'gifts', info.orderNsu), { status: 'sold', transaction_nsu: info.transactionId, slug: info.slug, capture_method: info.captureMethod || captureMethod || '', updatedAt: new Date().toISOString() }, { merge: true }); } catch (e) {}
+                                    markSold(info.orderNsu);
+                                    localStorage.removeItem('paymentReturn');
+                                }
+                            }).catch(()=>{});
+                        }
+                    } catch (e) {}
+                }
+            });
+
             const hasParams = !!(transactionId || orderNsu || slug || receiptUrl || captureMethod);
             if (hasParams) {
                 const info = { transactionId, orderNsu, slug, receiptUrl, captureMethod, verified: false };
-                sessionStorage.setItem('paymentReturn', JSON.stringify(info));
+                localStorage.setItem('paymentReturn', JSON.stringify(info));
+                if (orderNsu && receiptUrl) {
+                    try {
+                        await setDoc(doc(db, 'gifts', orderNsu), { status: 'sold', transaction_nsu: transactionId || '', slug: slug || '', capture_method: captureMethod || '', receipt_url: receiptUrl, source: 'redirect', updatedAt: new Date().toISOString() }, { merge: true });
+                    } catch (e) {}
+                }
                 if (receiptUrl) {
                     window.location.replace(receiptUrl);
                 }
@@ -215,6 +242,7 @@
                             btn.textContent = 'Comprado';
                             btn.disabled = true;
                             btn.setAttribute('aria-disabled','true');
+                            btn.classList.add('btn-comprado');
                             btn.style.pointerEvents = 'none';
                             const card = btn.closest('.gift-card');
                             if (card) { card.style.opacity = '0.6'; }
@@ -222,6 +250,15 @@
                     }
                 });
             }
+
+            onSnapshot(collection(db, 'gifts'), (snap) => {
+                snap.docChanges().forEach(change => {
+                    if (change.type === 'added' || change.type === 'modified') {
+                        const v = change.doc.data();
+                        if (v && v.status === 'sold') { markSold(change.doc.id); }
+                    }
+                });
+            });
         });
     </script>
 </body>

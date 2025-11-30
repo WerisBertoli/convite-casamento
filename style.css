@@ -800,14 +800,21 @@ html {
     font-size: 0.875rem;
     font-weight: 500;
     color: #111827;
-    background: #ffffff;
-    border: 1px solid #d1d5db;
+    background: #B7C2B2;
+    border: 1px solid #B7C2B2;
     border-radius: 999px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.btn-comprar:hover { background: #f3f4f6; }
+.btn-comprar:hover { filter: brightness(0.95); }
+
+.btn-comprar.btn-comprado,
+.btn-comprar[disabled] {
+    background: #ffffff;
+    border: 1px solid #000000;
+    color: #111827;
+}
 
 /* Modal de presente */
 .modal-presente { position: fixed; top:0; left:0; right:0; bottom:0; z-index: 1200; display:none; justify-content:center; align-items:center; padding: 1rem; }

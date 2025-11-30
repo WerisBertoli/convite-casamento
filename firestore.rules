@@ -7,6 +7,9 @@ service cloud.firestore {
       // Permite leitura e escrita até 31 de dezembro de 2026
       allow read, write: if request.time < timestamp.date(2026, 12, 31);
     }
+    match /gifts/{document} {
+      allow read, write: if request.time < timestamp.date(2026, 12, 31);
+    }
     
     // Regra alternativa mais restritiva (recomendada para produção)
     // match /rsvp/{document} {
