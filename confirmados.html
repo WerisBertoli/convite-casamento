@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="page-confirmados">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel | Marcella & Werisder</title>
+    <link rel="stylesheet" href="style.css">
     <style>
         * {
             margin: 0;
@@ -30,6 +31,7 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            margin-top: 4rem;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 1rem;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -56,6 +58,29 @@
             font-size: 1.1rem;
             color: #666666;
             font-family: "Snell Roundhand", cursive;
+        }
+
+        .download-actions {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .download-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #111827;
+            background: #B7C2B2;
+            border: 1px solid #B7C2B2;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .download-btn:hover {
+            filter: brightness(0.95);
         }
 
         .stats {
@@ -210,7 +235,7 @@
         }
     </style>
 </head>
-<body>
+<body class="page-confirmados">
     <nav class="navbar">
         <ul class="nav-list">
             <li><a href="index.html" class="nav-link">Início</a></li>
@@ -221,6 +246,9 @@
         <div class="header">
             <h1>Confirmações de Presença</h1>
             <p>Painel administrativo - Casamento</p>
+            <div class="download-actions">
+                <button id="btn-baixar-excel" class="download-btn">Baixar Excel (Confirmados)</button>
+            </div>
         </div>
 
         <div class="stats">
@@ -521,6 +549,38 @@
                 carregarDados(true);
             }
         });
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
+        }
+
+        async function baixarExcelConfirmados() {
+            try {
+                const qs = await getDocs(query(collection(db, 'rsvp'), where('resposta', '==', 'confirmado')));
+                const linhas = [['Nome', 'Data de Confirmação']];
+                qs.forEach((doc) => {
+                    const d = doc.data();
+                    const nome = capitalizarNome(d.nome || '');
+                    const data = formatarData(d.dataResposta);
+                    if (nome) linhas.push([nome, data]);
+                });
+                linhas.sort((a, b) => a[0].toLowerCase().localeCompare(b[0].toLowerCase()));
+
+                const rowsHtml = linhas.map(cells => '<tr>' + cells.map(c => '<td>' + escapeHtml(c) + '</td>').join('') + '</tr>').join('');
+                const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>table{border-collapse:collapse}td,th{border:1px solid #ddd;padding:6px;text-align:left}</style></head><body><table>${rowsHtml}</table></body></html>`;
+                const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const dt = new Date().toISOString().slice(0, 10);
+                a.href = url;
+                a.download = `confirmados_${dt}.xls`;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 0);
+            } catch (e) {}
+        }
+
+        document.getElementById('btn-baixar-excel').addEventListener('click', baixarExcelConfirmados);
     </script>
 </body>
 </html>
